@@ -1,56 +1,82 @@
-import React from "react";
-import { Send } from "lucide-react";
+"use client"
+import React, { useState } from "react";
+import { Box, Paper, Container } from "@mui/material";
+import { Header } from "./Header";
+import { SideMenu } from "./SideMenu";
+import { ProjectContent } from "./ProjectContent";
+import { MailContent } from "./MailContent";
+import { EditInstructions } from "./EditInstructions";
 
 export const MailEditor = () => {
+  const [mailContent, setMailContent] = useState("");
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [engineerInfo, setEngineerInfo] = useState("");
+  const [projectContent, setProjectContent] = useState("");
+  const [editInstructions, setEditInstructions] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleCopyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(mailContent);
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+    }
+  };
+
+  const handleGenerate = () => {
+    console.log("Generate button clicked");
+  };
+
+  const handleSend = () => {
+    console.log("Send button clicked");
+  };
+
+  const handleMenuToggle = () => {
+    setDrawerOpen(true);
+  };
+
+  const handleMenuClose = () => {
+    setDrawerOpen(false);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[calc(100vh-3rem)]">
-          {/* 案件内容 */}
-          <div className="lg:col-span-1 bg-white rounded-lg shadow-sm border">
-            <div className="p-4 border-b">
-              <h2 className="text-lg font-semibold text-gray-800">案件内容</h2>
-            </div>
-            <div className="p-4">
-              <textarea
-                className="w-full h-80 border border-gray-300 rounded-lg p-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="案件の詳細内容を入力してください..."
-              />
-            </div>
-          </div>
+    <Box>
+      <Header onMenuClick={handleMenuToggle} />
+      <SideMenu open={drawerOpen} onClose={handleMenuClose} engineerInfo={engineerInfo} setEngineerInfo={setEngineerInfo} />
 
-          {/* メール本文 + 修正指示 */}
-          <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border">
-            <div className="p-4 border-b">
-              <h2 className="text-lg font-semibold text-gray-800">メール本文</h2>
-            </div>
-            <div className="p-4">
-              <textarea
-                className="w-full h-48 border border-gray-300 rounded-lg p-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="メール本文を入力してください..."
-              />
-            </div>
-
-            {/* 修正指示 */}
-            <div className="border-t">
-              <div className="p-4 border-b">
-                <h2 className="text-lg font-semibold text-gray-800">修正指示</h2>
-              </div>
-              <div className="p-4">
-                <div className="relative">
-                  <textarea
-                    className="w-full h-20 border border-gray-300 rounded-lg p-3 pr-12 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="修正内容を入力してください..."
-                  />
-                  <button className="absolute right-3 bottom-3 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 shadow-sm">
-                    <Send size={16} />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      {/* メインコンテンツ */}
+      <Box
+        sx={{
+          minHeight: "100vh",
+          bgcolor: "grey.100",
+          pt: 11,
+          pb: 3,
+        }}
+      >
+        <Container maxWidth="xl">
+          <Box sx={{ display: "flex", gap: 3, minHeight: "calc(100vh - 6rem)" }}>
+            <ProjectContent onGenerate={handleGenerate} projectInfo={projectContent} setProjectInfo={setProjectContent} />
+            
+            <Box sx={{ flex: "2 1 67%" }}>
+              <Paper
+                elevation={1}
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <MailContent
+                  mailContent={mailContent}
+                  setMailContent={setMailContent}
+                  onCopy={handleCopyToClipboard}
+                />
+                <EditInstructions onSend={handleSend} editInstructions={editInstructions} setEditInstructions={setEditInstructions} />
+              </Paper>
+            </Box>
+          </Box>
+        </Container>
+      </Box>
+    </Box>
   );
 };
