@@ -28,6 +28,7 @@ export const EditInstructions = ({ onSend , editInstructions, setEditInstruction
             value={editInstructions}
             onChange={(e) => setEditInstructions(e.target.value)}
             sx={{
+              backgroundColor: "#f3f2ff",
               "& .MuiOutlinedInput-root": {
                 pr: 7,
               },

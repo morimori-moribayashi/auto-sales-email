@@ -1,11 +1,12 @@
 "use client"
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Paper, Container } from "@mui/material";
 import { Header } from "./Header";
 import { SideMenu } from "./SideMenu";
 import { ProjectContent } from "./ProjectContent";
 import { MailContent } from "./MailContent";
 import { EditInstructions } from "./EditInstructions";
+import { editEmail, generateEmail } from "@/services/openai/openai";
 
 export const MailEditor = () => {
   const [mailContent, setMailContent] = useState("");
@@ -13,7 +14,28 @@ export const MailEditor = () => {
   const [engineerInfo, setEngineerInfo] = useState("");
   const [projectContent, setProjectContent] = useState("");
   const [editInstructions, setEditInstructions] = useState("");
+  const [emailTemplate, setEmailTemplate] = useState("");
+  const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  
+  function saveToLocalStorage() {
+    localStorage.setItem("engineerInfo", engineerInfo)
+    localStorage.setItem("emailTemplate", emailTemplate)
+    localStorage.setItem("systemPrompt", prompt);
+  }
+
+  useEffect(() => {
+    setEngineerInfo(localStorage.getItem("engineerInfo") ?? "");
+    setEmailTemplate(localStorage.getItem("emailTemplate") ?? "");
+    setPrompt(localStorage.getItem("systemPrompt") ?? "");
+  }, []);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      saveToLocalStorage();
+    }, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [engineerInfo, emailTemplate, prompt]);
 
   const handleCopyToClipboard = async () => {
     try {
@@ -23,12 +45,18 @@ export const MailEditor = () => {
     }
   };
 
-  const handleGenerate = () => {
-    console.log("Generate button clicked");
+  const handleGenerate = async () => {
+    setIsLoading(true);
+    const res = await generateEmail({emailTemplate, engineerInfo, projectContent, prompt})
+    setMailContent(res ?? "");
+    setIsLoading(false);
   };
 
-  const handleSend = () => {
-    console.log("Send button clicked");
+  const handleSend = async () => {
+    setIsLoading(true);
+    const res = await editEmail({emailContent: mailContent, editInstructions})
+    setMailContent(res ?? "");
+    setIsLoading(false);
   };
 
   const handleMenuToggle = () => {
@@ -42,7 +70,16 @@ export const MailEditor = () => {
   return (
     <Box>
       <Header onMenuClick={handleMenuToggle} />
-      <SideMenu open={drawerOpen} onClose={handleMenuClose} engineerInfo={engineerInfo} setEngineerInfo={setEngineerInfo} />
+      <SideMenu open={drawerOpen} 
+   
+   onClose={handleMenuClose} 
+      engineerInfo={engineerInfo} 
+      setEngineerInfo={setEngineerInfo}
+      emailTemplate={emailTemplate}
+      setEmailTemplate={setEmailTemplate}
+      systemPrompt={prompt}
+      setSystemPrompt={setPrompt}
+    />
 
       {/* メインコンテンツ */}
       <Box
@@ -70,6 +107,7 @@ export const MailEditor = () => {
                   mailContent={mailContent}
                   setMailContent={setMailContent}
                   onCopy={handleCopyToClipboard}
+                  isLoading={isLoading}
                 />
                 <EditInstructions onSend={handleSend} editInstructions={editInstructions} setEditInstructions={setEditInstructions} />
               </Paper>

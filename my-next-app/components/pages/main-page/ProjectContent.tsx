@@ -8,6 +8,16 @@ interface ProjectContentProps {
 }
 
 export const ProjectContent = ({ onGenerate , projectInfo, setProjectInfo}: ProjectContentProps) => {
+  async function handlePaste() {
+    try {
+      const text = await navigator.clipboard.readText();
+      setProjectInfo(text);
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      onGenerate()
+    } catch (err) {
+      console.error('Failed to read clipboard contents: ', err);
+    }
+  }
   return (
     <Box sx={{ flex: "1 1 33%" }}>
       <Paper
@@ -52,7 +62,9 @@ export const ProjectContent = ({ onGenerate , projectInfo, setProjectInfo}: Proj
             placeholder="案件の詳細内容を入力してください..."
             value={projectInfo}
             onChange={(e) => setProjectInfo(e.target.value)}
+            onPaste={() => handlePaste()}
             sx={{
+              backgroundColor: "#fffcf2",
               "& .MuiInputBase-root": {
                 height: "100%",
                 alignItems: "stretch",
@@ -60,6 +72,7 @@ export const ProjectContent = ({ onGenerate , projectInfo, setProjectInfo}: Proj
               "& .MuiInputBase-input": {
                 height: "100% !important",
                 overflow: "auto !important",
+                resize: "vertical !important"
               },
             }}
           />

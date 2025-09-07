@@ -20,7 +20,7 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
           <MenuIcon />
         </IconButton>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          Auto Sales Email
+          営業メールジェネレーター
         </Typography>
       </Toolbar>
     </AppBar>

@@ -20,9 +20,13 @@ interface SideMenuProps {
   onClose: () => void;
   engineerInfo: string;
   setEngineerInfo: (info: string) => void;
+  emailTemplate: string;
+  setEmailTemplate: (template: string) => void;
+  systemPrompt: string;
+  setSystemPrompt: (prompt: string) => void;
 }
 
-export const SideMenu = ({ open, onClose , engineerInfo, setEngineerInfo}: SideMenuProps) => {
+export const SideMenu = ({ open, onClose , engineerInfo, setEngineerInfo, emailTemplate, setEmailTemplate, systemPrompt, setSystemPrompt}: SideMenuProps) => {
   const handleClose = (event: React.KeyboardEvent | React.MouseEvent) => {
     if (
       event.type === "keydown"
@@ -54,7 +58,6 @@ export const SideMenu = ({ open, onClose , engineerInfo, setEngineerInfo}: SideM
           placeholder="エンジニア情報を入力してください。"
           sx={{
             "& .MuiOutlinedInput-root": {
-              pr: 7,
             },
           }}
         />
@@ -67,9 +70,26 @@ export const SideMenu = ({ open, onClose , engineerInfo, setEngineerInfo}: SideM
           fullWidth
           variant="outlined"
           placeholder="メールテンプレートを入力してください。"
+          value={emailTemplate}
+          onChange={(e) => setEmailTemplate(e.target.value)}
           sx={{
             "& .MuiOutlinedInput-root": {
-              pr: 7,
+            },
+          }}
+        />
+        <Typography variant="h6" sx={{ p: 2 }}>
+          システムプロンプトを入力
+        </Typography>
+        <TextField
+          multiline
+          rows={20}
+          fullWidth
+          variant="outlined"
+          placeholder="システムプロンプトを入力してください。"
+          value={systemPrompt}
+          onChange={(e) => setSystemPrompt(e.target.value)}
+          sx={{
+            "& .MuiOutlinedInput-root": {
             },
           }}
         />
@@ -80,6 +100,7 @@ export const SideMenu = ({ open, onClose , engineerInfo, setEngineerInfo}: SideM
           sx={{
             minWidth: "60px",
             height: "32px",
+            my: 5,
           }}
         >
           閉じる
