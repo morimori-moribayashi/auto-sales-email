@@ -40,6 +40,7 @@ export const editEmail = async ({emailContent, editInstructions}: editEmailProps
 };
 
 export async function generateGmailFilter(prompt: string, engineerInfo: string, additionalCriteria: string){
+  const companyEmailDomain = '@oneness-group.jp'
   const formatInstruction = `
 # 出力フォーマット (JSON)
 code JSON
@@ -49,14 +50,15 @@ code JSON
     "core_skills": [
       "(抽出したコア技術1)",
       "(抽出したコア技術2)",
-      "(抽出したコア技術3)"
+      "(抽出したコア技術3)",
+      ...
     ],
     "strengths": "(候補者の強みを簡潔な文章で記述)"
   },
   "filters": [
     {
       "pattern_name": "【(戦略名)特化】フィルター",
-      "filter_string": "from:(-(@your-company.com)) (キーワード群) (キーワード群) -{除外キーワード群}",
+      "filter_string": "from:(-(${companyEmailDomain})) (キーワード群) (キーワード群) -{除外キーワード群}",
       "description": "(このフィルターがどのような目的で、なぜこのキーワードを選んだのかを簡潔に説明)",
       "expected_results": [
         "(このフィルターで見つかる案件の具体例1)",
