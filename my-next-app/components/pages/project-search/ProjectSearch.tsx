@@ -3,31 +3,29 @@ import React, { useEffect, useState } from "react";
 import { Box, Paper, Container } from "@mui/material";
 import { Header } from "@/components/header/Header";
 import { SettingSideMenu } from "./SettingSideMenu";
-import { ProjectContent } from "./ProjectContent";
-import { MailContent } from "./MailContent";
-import { EditInstructions } from "./EditInstructions";
-import { editEmail, generateEmail } from "@/services/openai/openai";
+import { EngineerInfo } from "./EngineerInput";
+import { FilterContent } from "./FilterContent";
+import { AdditionalInstructions } from "./AdditonalInstructions";
+import { editEmail, generateEmail, generateGmailFilter } from "@/services/openai/openai";
+import { emailFilter } from "@/services/openai/model";
 
-export const MailEditor = () => {
+export const ProjectSearch = () => {
   const [mailContent, setMailContent] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [engineerInfo, setEngineerInfo] = useState("");
-  const [projectContent, setProjectContent] = useState("");
-  const [editInstructions, setEditInstructions] = useState("");
-  const [emailTemplate, setEmailTemplate] = useState("");
+  const [additionalInstructions, setAdditionalInstructions] = useState("");
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [filterContent,setFilterContent] = useState<emailFilter>();
   
   function saveToLocalStorage() {
-    localStorage.setItem("engineerInfo", engineerInfo)
-    localStorage.setItem("emailTemplate", emailTemplate)
-    localStorage.setItem("systemPrompt", prompt);
+    localStorage.setItem("engineerInfoForProjectSearch", engineerInfo)
+    localStorage.setItem("systemPromptForProjectSearch", prompt);
   }
 
   useEffect(() => {
-    setEngineerInfo(localStorage.getItem("engineerInfo") ?? "");
-    setEmailTemplate(localStorage.getItem("emailTemplate") ?? "");
-    setPrompt(localStorage.getItem("systemPrompt") ?? "");
+    setEngineerInfo(localStorage.getItem("engineerInfoForProjectSearch") ?? "");
+    setPrompt(localStorage.getItem("systemPromptForProjectSearch") ?? "");
   }, []);
 
   useEffect(() => {
@@ -35,7 +33,7 @@ export const MailEditor = () => {
       saveToLocalStorage();
     }, 1000);
     return () => clearTimeout(timeoutId);
-  }, [engineerInfo, emailTemplate, prompt]);
+  }, [engineerInfo, prompt]);
 
   const handleCopyToClipboard = async () => {
     try {
@@ -47,15 +45,8 @@ export const MailEditor = () => {
 
   const handleGenerate = async () => {
     setIsLoading(true);
-    const res = await generateEmail({emailTemplate, engineerInfo, projectContent, prompt})
-    setMailContent(res ?? "");
-    setIsLoading(false);
-  };
-
-  const handleSend = async () => {
-    setIsLoading(true);
-    const res = await editEmail({emailContent: mailContent, editInstructions})
-    setMailContent(res ?? "");
+    const res = await generateGmailFilter(prompt,engineerInfo,additionalInstructions)
+    setFilterContent(res ?? undefined)
     setIsLoading(false);
   };
 
@@ -69,14 +60,9 @@ export const MailEditor = () => {
 
   return (
     <Box>
-      <Header onMenuClick={handleMenuToggle} title="営業メールジェネレーター"/>
+      <Header onMenuClick={handleMenuToggle} title="案件検索"/>
       <SettingSideMenu open={drawerOpen} 
-   
-   onClose={handleMenuClose} 
-      engineerInfo={engineerInfo} 
-      setEngineerInfo={setEngineerInfo}
-      emailTemplate={emailTemplate}
-      setEmailTemplate={setEmailTemplate}
+      onClose={handleMenuClose} 
       systemPrompt={prompt}
       setSystemPrompt={setPrompt}
     />
@@ -92,8 +78,10 @@ export const MailEditor = () => {
       >
         <Container maxWidth="xl">
           <Box sx={{ display: "flex", gap: 3, minHeight: "calc(100vh - 6rem)" }}>
-            <ProjectContent onGenerate={handleGenerate} projectInfo={projectContent} setProjectInfo={setProjectContent} />
-            
+            <div className="flex-col w-[30vw]">
+              <EngineerInfo onGenerate={handleGenerate} engineerInfo={engineerInfo} setEngineerInfo={setEngineerInfo} />
+              <AdditionalInstructions additionalInstructions={additionalInstructions} setAdditionalInstructions={setAdditionalInstructions} />
+            </div>
             <Box sx={{ flex: "2 1 67%" }}>
               <Paper
                 elevation={1}
@@ -103,13 +91,11 @@ export const MailEditor = () => {
                   flexDirection: "column",
                 }}
               >
-                <MailContent
-                  mailContent={mailContent}
-                  setMailContent={setMailContent}
+                <FilterContent
+                  filterContent={filterContent}
                   onCopy={handleCopyToClipboard}
                   isLoading={isLoading}
                 />
-                <EditInstructions onSend={handleSend} editInstructions={editInstructions} setEditInstructions={setEditInstructions} />
               </Paper>
             </Box>
           </Box>

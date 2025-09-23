@@ -6,9 +6,12 @@ export const config = {
 
 export function middleware(req: NextRequest) {
   console.log("ミドルウェア発動😃");
-
+  const path = req.nextUrl.pathname;
   // BASIC認証が有効でない場合はスキップする
   if (process.env.ENABLE_BASIC_AUTH !== "true") {
+    if (path === "/") {
+      return NextResponse.redirect(new URL("/auto-sales-email", req.url));
+    }
     return NextResponse.next();
   }
 
@@ -17,6 +20,9 @@ export function middleware(req: NextRequest) {
     process.env.BASIC_AUTH_USERNAME === undefined ||
     process.env.BASIC_AUTH_PASSWORD === undefined
   ) {
+    if (path === "/") {
+      return NextResponse.redirect(new URL("/auto-sales-email", req.url));
+    }
     return NextResponse.next();
   }
 
@@ -35,6 +41,9 @@ export function middleware(req: NextRequest) {
       username === process.env.BASIC_AUTH_USERNAME &&
       password === process.env.BASIC_AUTH_PASSWORD
     ) {
+      if (path === "/") {
+        return NextResponse.redirect(new URL("/auto-sales-email", req.url));
+      }
       // BASIC認証に成功した場合、アクセスを許可する
       return NextResponse.next();
     }

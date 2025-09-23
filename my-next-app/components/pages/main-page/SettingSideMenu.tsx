@@ -1,19 +1,11 @@
 import React from "react";
 import {
   Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
   Box,
   Typography,
   TextField,
   Button,
 } from "@mui/material";
-import HomeIcon from "@mui/icons-material/Home";
-import SettingsIcon from "@mui/icons-material/Settings";
-import HistoryIcon from "@mui/icons-material/History";
 
 interface SideMenuProps {
   open: boolean;
@@ -26,7 +18,7 @@ interface SideMenuProps {
   setSystemPrompt: (prompt: string) => void;
 }
 
-export const SideMenu = ({ open, onClose , engineerInfo, setEngineerInfo, emailTemplate, setEmailTemplate, systemPrompt, setSystemPrompt}: SideMenuProps) => {
+export const SettingSideMenu = ({ open, onClose , engineerInfo, setEngineerInfo, emailTemplate, setEmailTemplate, systemPrompt, setSystemPrompt}: SideMenuProps) => {
   const handleClose = (event: React.KeyboardEvent | React.MouseEvent) => {
     if (
       event.type === "keydown"
@@ -37,7 +29,7 @@ export const SideMenu = ({ open, onClose , engineerInfo, setEngineerInfo, emailT
   };
 
   return (
-    <Drawer anchor="left" open={open} onClose={onClose}>
+    <Drawer anchor="right" open={open} onClose={onClose}>
       <Box
         sx={{ 
           width: 500,
