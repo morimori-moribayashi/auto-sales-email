@@ -5,7 +5,7 @@ import React, { useCallback, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import EngineerInfoHistoryDialog from './EngineerInfoHistoryDialog';
 import { z } from "zod";
-import { useFileInfoHistory } from '../../../hooks/useFileInfoHistory';
+import { useFileInfoHistory } from '../../hooks/useFileInfoHistory';
 
 export const FileInfoSchema = z.object({
   id: z.string(),

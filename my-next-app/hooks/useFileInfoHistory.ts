@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { FileInfo, FileInfoSchema } from '../components/pages/main-page/FileDropZone';
+import { FileInfo, FileInfoSchema } from '../components/FileDropZone/FileDropZone';
 
 const STORAGE_KEY = 'fileInfoHistory';
 

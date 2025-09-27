@@ -8,6 +8,7 @@ import { FilterContent } from "./FilterContent";
 import { AdditionalInstructions } from "./AdditonalInstructions";
 import { editEmail, generateEmail, generateGmailFilter } from "@/services/openai/openai";
 import { emailFilter } from "@/services/openai/model";
+import FileDropZone from "@/components/FileDropZone/FileDropZone";
 
 export const ProjectSearch = () => {
   const [mailContent, setMailContent] = useState("");
@@ -81,6 +82,7 @@ export const ProjectSearch = () => {
             <div className="flex-col w-[30vw]">
               <EngineerInfo onGenerate={handleGenerate} engineerInfo={engineerInfo} setEngineerInfo={setEngineerInfo} />
               <AdditionalInstructions additionalInstructions={additionalInstructions} setAdditionalInstructions={setAdditionalInstructions} />
+              <FileDropZone setEngineerInfo={setEngineerInfo} />
             </div>
             <Box sx={{ flex: "2 1 67%" }}>
               <Paper

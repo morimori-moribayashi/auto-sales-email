@@ -7,8 +7,8 @@ import { ProjectContent } from "./ProjectContent";
 import { MailContent } from "./MailContent";
 import { EditInstructions } from "./EditInstructions";
 import { editEmail, generateEmail } from "@/services/openai/openai";
-import FileDropZone from "./FileDropZone";
-import EngineerInfoHistoryDialog from "./EngineerInfoHistoryDialog";
+import FileDropZone from "../../FileDropZone/FileDropZone";
+import EngineerInfoHistoryDialog from "../../FileDropZone/EngineerInfoHistoryDialog";
 
 export const MailEditor = () => {
   const [mailContent, setMailContent] = useState("");

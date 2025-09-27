@@ -15,7 +15,7 @@ import {
 } from '@mui/material'
 import { Delete as DeleteIcon, History as HistoryIcon } from '@mui/icons-material'
 import { FileInfo } from './FileDropZone';
-import { useFileInfoHistory } from '../../../hooks/useFileInfoHistory';
+import { useFileInfoHistory } from '../../hooks/useFileInfoHistory';
 
 interface EngineerInfoHistoryDialogProps {
     open: boolean;
