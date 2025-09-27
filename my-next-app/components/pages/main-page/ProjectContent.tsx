@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Paper, Typography, TextField, Button } from "@mui/material";
 
 interface ProjectContentProps {
-  onGenerate: (projectInfo : string) => void;
+  onGenerate: (projectInfo? : string) => void;
   projectInfo: string;
   setProjectInfo: (info: string) => void;
 }
@@ -43,7 +43,7 @@ export const ProjectContent = ({ onGenerate , projectInfo, setProjectInfo}: Proj
           <Button
             variant="contained"
             size="small"
-            onClick={onGenerate}
+            onClick={()=>onGenerate()}
             sx={{
               minWidth: "60px",
               height: "32px",
