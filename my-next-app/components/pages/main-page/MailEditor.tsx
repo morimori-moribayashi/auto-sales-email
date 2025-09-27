@@ -8,6 +8,7 @@ import { MailContent } from "./MailContent";
 import { EditInstructions } from "./EditInstructions";
 import { editEmail, generateEmail } from "@/services/openai/openai";
 import FileDropZone from "./FileDropZone";
+import EngineerInfoHistoryDialog from "./EngineerInfoHistoryDialog";
 
 export const MailEditor = () => {
   const [mailContent, setMailContent] = useState("");
@@ -95,7 +96,7 @@ export const MailEditor = () => {
         <Container maxWidth="xl">
           <Box sx={{ display: "flex", gap: 3, minHeight: "calc(100vh - 6rem)" }}>
             <div className="flex-col w-[30vw]">
-              <ProjectContent onGenerate={handleGenerate} projectInfo={projectContent} setProjectInfo={setProjectContent} />\
+              <ProjectContent onGenerate={handleGenerate} projectInfo={projectContent} setProjectInfo={setProjectContent} />
               <FileDropZone setEngineerInfo={setEngineerInfo} />
             </div>
             <Box sx={{ flex: "2 1 67%" }}>

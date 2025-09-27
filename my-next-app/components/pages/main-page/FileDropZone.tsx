@@ -1,16 +1,38 @@
 
-import { Box, CircularProgress, Paper, Typography } from '@mui/material'
+import { Box, Button, CircularProgress, Paper, Typography } from '@mui/material'
 import { Upload } from 'lucide-react'
 import React, { useCallback, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
+import EngineerInfoHistoryDialog from './EngineerInfoHistoryDialog';
+import { z } from "zod";
+import { useFileInfoHistory } from '../../../hooks/useFileInfoHistory';
+
+export const FileInfoSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  size: z.number(),
+  text: z.string(),
+  date: z.date(),
+});
+
+export type FileInfo = z.infer<typeof FileInfoSchema>;
 
 interface props {
   setEngineerInfo: (info: string) => void;
 }
 
+type FileInfoHistory = FileInfo[]
+
 function FileDropZone({setEngineerInfo}: props) {
-  const [files, setFiles] = useState<File[]>([])
   const [isLoading,setIsLoading] = useState(false)
+  const [historyModalOpen, setHistoryModalOpen] = useState(false)
+  const { currentFileInfo, saveFileInfo, setCurrentFileInfo } = useFileInfoHistory()
+
+  function handleHistorySelect(info: FileInfo ) {
+    setEngineerInfo(info.text)
+    setCurrentFileInfo(info)
+    setHistoryModalOpen(false)
+  }
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     console.log("変換開始")
@@ -34,7 +56,14 @@ function FileDropZone({setEngineerInfo}: props) {
       
       const result = await response.json()
       setEngineerInfo(result.markdown)
-      setFiles(acceptedFiles)
+      const fInfo = {
+        id: self.crypto.randomUUID(),
+        name: file.name,
+        size: file.size,
+        text: result.markdown,
+        date: new Date()
+      }
+      saveFileInfo(fInfo)
       console.log('変換完了:', result.markdown)
     } catch (error) {
       console.error('アップロード中にエラーが発生しました:', error)
@@ -42,6 +71,8 @@ function FileDropZone({setEngineerInfo}: props) {
       setIsLoading(false)
     }
   }, [])
+
+
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -107,18 +138,35 @@ function FileDropZone({setEngineerInfo}: props) {
           }
           </Box>
           
-          {files.length > 0 && (
+          {currentFileInfo && (
             <Box sx={{ mt: 2 }}>
               <Typography variant="subtitle2" gutterBottom>
                 アップロードファイル:
               </Typography>
               <Typography variant="body2" sx={{ ml: 1 }}>
-                • {files[0].name} ({Math.round(files[0].size / 1024)} KB)
+                • {currentFileInfo.name} ({Math.round(currentFileInfo.size / 1024)} KB)
               </Typography>
             </Box>
           )}
+          <Button
+            variant="contained"
+            size="large"
+            sx={{
+              Width: "100%",
+              bgcolor: "primary.main",
+              color: "white",
+              height: "32px",
+              mt: 2,
+              mb: 2,
+            }}
+            disabled={isLoading}
+            onClick={() => setHistoryModalOpen(true)}
+          >
+            履歴から選ぶ
+          </Button>
         </Box>
       </Paper>
+      <EngineerInfoHistoryDialog open={historyModalOpen} onClose={() => setHistoryModalOpen(false)} onSelect={handleHistorySelect} />
     </Box>
   )
 }
