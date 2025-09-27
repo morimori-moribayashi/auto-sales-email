@@ -9,6 +9,7 @@ import { AdditionalInstructions } from "./AdditonalInstructions";
 import { editEmail, generateEmail, generateGmailFilter } from "@/services/openai/openai";
 import { emailFilter } from "@/services/openai/model";
 import FileDropZone from "@/components/FileDropZone/FileDropZone";
+import { SearchAndGenerateButton } from "./SearechAndGenerateButton";
 
 export const ProjectSearch = () => {
   const [mailContent, setMailContent] = useState("");
@@ -66,6 +67,8 @@ export const ProjectSearch = () => {
       onClose={handleMenuClose} 
       systemPrompt={prompt}
       setSystemPrompt={setPrompt}
+      engineerInfo={engineerInfo}
+      setEngineerInfo={setEngineerInfo}
     />
 
       {/* メインコンテンツ */}
@@ -80,9 +83,9 @@ export const ProjectSearch = () => {
         <Container maxWidth="xl">
           <Box sx={{ display: "flex", gap: 3, minHeight: "calc(100vh - 6rem)" }}>
             <div className="flex-col w-[30vw]">
-              <EngineerInfo onGenerate={handleGenerate} engineerInfo={engineerInfo} setEngineerInfo={setEngineerInfo} />
-              <AdditionalInstructions additionalInstructions={additionalInstructions} setAdditionalInstructions={setAdditionalInstructions} />
+              <SearchAndGenerateButton onGenerate={handleGenerate} />
               <FileDropZone setEngineerInfo={setEngineerInfo} />
+              <AdditionalInstructions additionalInstructions={additionalInstructions} setAdditionalInstructions={setAdditionalInstructions} />
             </div>
             <Box sx={{ flex: "2 1 67%" }}>
               <Paper

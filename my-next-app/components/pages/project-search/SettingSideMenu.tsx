@@ -6,15 +6,18 @@ import {
   TextField,
   Button,
 } from "@mui/material";
+import { EngineerInfo } from "./EngineerInput";
 
 interface SideMenuProps {
   open: boolean;
   onClose: () => void;
   systemPrompt: string;
   setSystemPrompt: (prompt: string) => void;
+  engineerInfo: string;
+  setEngineerInfo: (info: string) => void;
 }
 
-export const SettingSideMenu = ({ open, onClose , systemPrompt, setSystemPrompt}: SideMenuProps) => {
+export const SettingSideMenu = ({ open, onClose , systemPrompt, setSystemPrompt, engineerInfo, setEngineerInfo}: SideMenuProps) => {
   const handleClose = (event: React.KeyboardEvent | React.MouseEvent) => {
     if (
       event.type === "keydown"
@@ -26,6 +29,7 @@ export const SettingSideMenu = ({ open, onClose , systemPrompt, setSystemPrompt}
 
   return (
     <Drawer anchor="right" open={open} onClose={onClose}>
+      <EngineerInfo engineerInfo={engineerInfo} setEngineerInfo={setEngineerInfo} />
       <Box
         sx={{ 
           width: 500,
