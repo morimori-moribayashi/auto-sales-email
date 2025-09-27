@@ -1,6 +1,6 @@
 "use server"
 import "server-only"
-import { getOpenAI } from "./openai";
+import { getGemini, getOpenAI } from "./openai";
 import { Stream } from "openai/streaming";
 import { ResponseStreamEvent } from "openai/resources/responses/responses.js";
 
@@ -38,6 +38,42 @@ export const editEmail = async ({emailContent, editInstructions}: editEmailProps
   });
   return await makeReadableStreamResponse(stream)
 };
+
+export async function generateGmailFilterStream(prompt: string, engineerInfo: string, additionalCriteria: string, history?: string){
+  const openai = await getOpenAI()
+  const companyEmailDomain = '@oneness-group.jp'
+  const formatInstruction = `
+# 出力形式(markdown)
+
+## スキルシート分析結果
+### 経験レベル
+(候補者の経験レベルを文字列で記述)
+### コア技術
+(抽出したコア技術1), (抽出したコア技術2), (抽出したコア技術3)...
+### 強み
+(候補者の強みを簡潔な文章で記述)
+
+## フィルター(複数個)
+### 【(戦略名)特化】フィルター
+
+\`\`\`
+from:(-(${companyEmailDomain})) (キーワード群) (キーワード群) -{除外キーワード群}
+\`\`\`
+(このフィルターがどのような目的で、なぜこのキーワードを選んだのかを簡潔に説明)
+### ...
+  `
+  const system = `${prompt}\n${formatInstruction}`
+  const message = `[エンジニア情報]\n${engineerInfo}\n[追加情報]\n${additionalCriteria}`
+  const stream = await openai.responses.create({
+    model: "gpt-4.1",
+    input: [
+      { role: "system", content: system },
+      { role: "user", content: message }
+    ],
+    stream: true,
+  });
+return makeReadableStreamResponse(stream)
+}
 
 async function makeReadableStreamResponse(stream : Stream<ResponseStreamEvent>) {
   return new ReadableStream({

@@ -1,24 +1,29 @@
 "use client"
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { Box, Paper, Container } from "@mui/material";
 import { Header } from "@/components/header/Header";
 import { SettingSideMenu } from "./SettingSideMenu";
-import { EngineerInfo } from "./EngineerInput";
 import { FilterContent } from "./FilterContent";
 import { AdditionalInstructions } from "./AdditonalInstructions";
-import { editEmail, generateEmail, generateGmailFilter } from "@/services/openai/openai";
-import { emailFilter } from "@/services/openai/model";
 import FileDropZone from "@/components/FileDropZone/FileDropZone";
 import { SearchAndGenerateButton } from "./SearechAndGenerateButton";
+import { useGmailFilterGeneration } from "@/hooks/useGmailFilterGeneration";
 
 export const ProjectSearch = () => {
-  const [mailContent, setMailContent] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [engineerInfo, setEngineerInfo] = useState("");
-  const [additionalInstructions, setAdditionalInstructions] = useState("");
-  const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [filterContent,setFilterContent] = useState<emailFilter>();
+  const {
+    prompt,
+    setPrompt,
+    engineerInfo,
+    setEngineerInfo,
+    filterContent,
+    setFilterContent,
+    additionalCriteria,
+    setAdditionalCriteria,
+    generateGmailFilter,
+  } = useGmailFilterGeneration()
+  
   
   function saveToLocalStorage() {
     localStorage.setItem("engineerInfoForProjectSearch", engineerInfo)
@@ -37,19 +42,8 @@ export const ProjectSearch = () => {
     return () => clearTimeout(timeoutId);
   }, [engineerInfo, prompt]);
 
-  const handleCopyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(mailContent);
-    } catch (err) {
-      console.error("Failed to copy text: ", err);
-    }
-  };
-
   const handleGenerate = async () => {
-    setIsLoading(true);
-    const res = await generateGmailFilter(prompt,engineerInfo,additionalInstructions)
-    setFilterContent(res ?? undefined)
-    setIsLoading(false);
+    const res = await generateGmailFilter()
   };
 
   const handleMenuToggle = () => {
@@ -85,7 +79,7 @@ export const ProjectSearch = () => {
             <div className="flex-col w-[30vw]">
               <SearchAndGenerateButton onGenerate={handleGenerate} />
               <FileDropZone setEngineerInfo={setEngineerInfo} />
-              <AdditionalInstructions additionalInstructions={additionalInstructions} setAdditionalInstructions={setAdditionalInstructions} />
+              <AdditionalInstructions additionalInstructions={additionalCriteria} setAdditionalInstructions={setAdditionalCriteria} />
             </div>
             <Box sx={{ flex: "2 1 67%" }}>
               <Paper
@@ -98,7 +92,6 @@ export const ProjectSearch = () => {
               >
                 <FilterContent
                   filterContent={filterContent}
-                  onCopy={handleCopyToClipboard}
                   isLoading={isLoading}
                 />
               </Paper>
