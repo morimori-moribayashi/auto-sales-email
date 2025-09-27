@@ -2,18 +2,17 @@ import React from "react";
 import { Box, Paper, Typography, TextField, Button } from "@mui/material";
 
 interface ProjectContentProps {
-  onGenerate: () => void;
+  onGenerate: (projectInfo : string) => void;
   projectInfo: string;
   setProjectInfo: (info: string) => void;
 }
 
 export const ProjectContent = ({ onGenerate , projectInfo, setProjectInfo}: ProjectContentProps) => {
-  async function handlePaste() {
+  async function handlePaste(e : React.ClipboardEvent<HTMLDivElement>) {
     try {
-      const text = await navigator.clipboard.readText();
+      const text = e.clipboardData.getData('text/plain');
       setProjectInfo(text);
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      onGenerate()
+      onGenerate(text)
     } catch (err) {
       console.error('Failed to read clipboard contents: ', err);
     }
@@ -62,7 +61,7 @@ export const ProjectContent = ({ onGenerate , projectInfo, setProjectInfo}: Proj
             placeholder="案件の詳細内容を入力してください..."
             value={projectInfo}
             onChange={(e) => setProjectInfo(e.target.value)}
-            onPaste={() => handlePaste()}
+            onPaste={(e) => handlePaste(e)}
             sx={{
               backgroundColor: "#fffcf2",
               "& .MuiInputBase-root": {

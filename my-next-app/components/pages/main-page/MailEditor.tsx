@@ -46,9 +46,10 @@ export const MailEditor = () => {
     }
   };
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (projectInfoText?: string) => {
     setIsLoading(true);
-    const res = await generateEmail({emailTemplate, engineerInfo, projectContent, prompt})
+    const projectInfo = projectInfoText ?? (projectContent ?? "");
+    const res = await generateEmail({emailTemplate, engineerInfo, projectContent: projectInfo, prompt})
     setMailContent(res ?? "");
     setIsLoading(false);
   };
