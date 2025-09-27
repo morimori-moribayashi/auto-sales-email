@@ -33,7 +33,6 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const base64String = Buffer.from(arrayBuffer).toString('base64');
     const markdown = await convertPDFtoMD(base64String, file.name)
-    console.log(markdown)
 
     return NextResponse.json({
       markdown

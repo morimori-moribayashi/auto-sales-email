@@ -15,13 +15,6 @@ export const MailContent = ({
   onCopy,
   isLoading
 }: MailContentProps) => {
-  if(isLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
-        <CircularProgress />
-      </Box>
-    )
-  }
   return (
     <>
       <Box
@@ -34,6 +27,15 @@ export const MailContent = ({
           justifyContent: "space-between",
         }}
       >
+        {isLoading ?
+        <>
+        <Typography variant="h6" component="h2" fontWeight={600}>
+          生成中
+        </Typography>  
+        <CircularProgress size={24} />
+        </>
+      :
+      <>
         <Typography variant="h6" component="h2" fontWeight={600}>
           メール本文
         </Typography>
@@ -49,6 +51,8 @@ export const MailContent = ({
         >
           <ContentCopyIcon fontSize="small" />
         </IconButton>
+      </>
+      }
       </Box>
       <Box sx={{ p: 2 }}>
         <TextField
@@ -56,6 +60,13 @@ export const MailContent = ({
           fullWidth
           variant="outlined"
           value={mailContent}
+          sx={{
+            backgroundColor: isLoading? "#fff7c9ff": "#ffffffff",
+
+          }}
+          onKeyDown={(e) => {
+            if(isLoading) return
+          }}
           onChange={(e) => setMailContent(e.target.value)}
           rows={20}
           />

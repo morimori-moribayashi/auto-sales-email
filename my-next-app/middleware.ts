@@ -5,7 +5,6 @@ export const config = {
 };
 
 export function middleware(req: NextRequest) {
-  console.log("ミドルウェア発動😃");
   const path = req.nextUrl.pathname;
   // BASIC認証が有効でない場合はスキップする
   if (process.env.ENABLE_BASIC_AUTH !== "true") {

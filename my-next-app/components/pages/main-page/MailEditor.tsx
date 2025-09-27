@@ -9,16 +9,27 @@ import { EditInstructions } from "./EditInstructions";
 import { editEmail, generateEmail } from "@/services/openai/openai";
 import FileDropZone from "../../FileDropZone/FileDropZone";
 import EngineerInfoHistoryDialog from "../../FileDropZone/EngineerInfoHistoryDialog";
+import { useEmailGeneration } from "@/hooks/useEmailGeneration";
 
 export const MailEditor = () => {
-  const [mailContent, setMailContent] = useState("");
+  const {
+    engineerInfo,
+    setEngineerInfo,
+    emailTemplate,
+    setEmailTemplate,
+    prompt,
+    setPrompt,
+    projectContent,
+    setProjectContent,
+    mailContent,
+    setMailContent,
+    editInstructions,
+    setEditInstructions,
+    loading: isLoading,
+    generateEmail,
+    editEmail
+  } = useEmailGeneration()
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [engineerInfo, setEngineerInfo] = useState("");
-  const [projectContent, setProjectContent] = useState("");
-  const [editInstructions, setEditInstructions] = useState("");
-  const [emailTemplate, setEmailTemplate] = useState("");
-  const [prompt, setPrompt] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   
   function saveToLocalStorage() {
     localStorage.setItem("engineerInfo", engineerInfo)
@@ -48,18 +59,12 @@ export const MailEditor = () => {
   };
 
   const handleGenerate = async (projectInfoText?: string) => {
-    setIsLoading(true);
     const projectInfo = projectInfoText ?? (projectContent ?? "");
-    const res = await generateEmail({emailTemplate, engineerInfo, projectContent: projectInfo, prompt})
-    setMailContent(res ?? "");
-    setIsLoading(false);
+    const res = await generateEmail(projectInfo)
   };
 
   const handleSend = async () => {
-    setIsLoading(true);
-    const res = await editEmail({emailContent: mailContent, editInstructions})
-    setMailContent(res ?? "");
-    setIsLoading(false);
+    const res = await editEmail()
   };
 
   const handleMenuToggle = () => {

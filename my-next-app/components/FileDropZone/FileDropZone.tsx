@@ -35,7 +35,6 @@ function FileDropZone({setEngineerInfo}: props) {
   }
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    console.log("変換開始")
     setIsLoading(true)
     const file = acceptedFiles[0]
     
@@ -64,7 +63,6 @@ function FileDropZone({setEngineerInfo}: props) {
         date: new Date()
       }
       saveFileInfo(fInfo)
-      console.log('変換完了:', result.markdown)
     } catch (error) {
       console.error('アップロード中にエラーが発生しました:', error)
     } finally {

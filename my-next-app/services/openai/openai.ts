@@ -16,16 +16,21 @@ type editEmailProps = {
     editInstructions: string;
 };
 
-const openai = new OpenAI({
+export async function getOpenAI(){
+ return new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+}
 
-const gemini = new OpenAI({
+export async function getGemini(){
+  return new OpenAI({
   baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
   apiKey: process.env.GEMINI_API_KEY,
 })
+}
 
 export const generateEmail = async ({emailTemplate, engineerInfo, projectContent, prompt}: generatEmailProps) => {
+  const openai = await getOpenAI()
   const context = `メールのテンプレート:\n${emailTemplate}\n要員情報:\n${engineerInfo}\n案件内容:\n${projectContent}`  
   const message = prompt + '\n' + context
   const response = await openai.chat.completions.create({
@@ -36,6 +41,7 @@ export const generateEmail = async ({emailTemplate, engineerInfo, projectContent
 };
 
 export const editEmail = async ({emailContent, editInstructions}: editEmailProps) => {
+  const openai = await getOpenAI()
   const message = `編集指示に従ったメール本文を修正してください。\nメール本文:\n${emailContent}\n編集指示:\n${editInstructions}`
   const response = await openai.chat.completions.create({
     messages: [{ role: "user", content: message }],
@@ -45,6 +51,7 @@ export const editEmail = async ({emailContent, editInstructions}: editEmailProps
 };
 
 export async function generateGmailFilter(prompt: string, engineerInfo: string, additionalCriteria: string, history?: string){
+  const gemini = await getGemini()
   const companyEmailDomain = '@oneness-group.jp'
   const formatInstruction = `
 # 出力フォーマット (JSON)
@@ -120,6 +127,7 @@ code JSON
 }
 
 export async function convertPDFtoMD(base64String : string, fileName: string){
+  const openai = await getOpenAI()
   const response = await openai.responses.create({
     model: "gpt-5-mini",
     input: [
