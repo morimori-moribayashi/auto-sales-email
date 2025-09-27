@@ -20,6 +20,11 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+const gemini = new OpenAI({
+  baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
+  apiKey: process.env.GEMINI_API_KEY,
+})
+
 export const generateEmail = async ({emailTemplate, engineerInfo, projectContent, prompt}: generatEmailProps) => {
   const context = `メールのテンプレート:\n${emailTemplate}\n要員情報:\n${engineerInfo}\n案件内容:\n${projectContent}`  
   const message = prompt + '\n' + context
@@ -39,7 +44,7 @@ export const editEmail = async ({emailContent, editInstructions}: editEmailProps
   return response.choices[0].message.content;
 };
 
-export async function generateGmailFilter(prompt: string, engineerInfo: string, additionalCriteria: string){
+export async function generateGmailFilter(prompt: string, engineerInfo: string, additionalCriteria: string, history?: string){
   const companyEmailDomain = '@oneness-group.jp'
   const formatInstruction = `
 # 出力フォーマット (JSON)
@@ -60,23 +65,18 @@ code JSON
       "pattern_name": "【(戦略名)特化】フィルター",
       "filter_string": "from:(-(${companyEmailDomain})) (キーワード群) (キーワード群) -{除外キーワード群}",
       "description": "(このフィルターがどのような目的で、なぜこのキーワードを選んだのかを簡潔に説明)",
-      "expected_results": [
-        "(このフィルターで見つかる案件の具体例1)",
-        "(このフィルターで見つかる案件の具体例2)"
-      ]
     },...
   ],
-  "usage_recommendation": "まずは最もバランスの取れた「(パターン名)」からお試しいただくのがおすすめです。より専門的な案件を探したい場合は「(パターン名)」を、視野を広げたい場合は「(パターン名)」をご利用ください。"
 }
   `
   const system = `${prompt}\n${formatInstruction}`
   const message = `[エンジニア情報]\n${engineerInfo}\n[追加情報]\n${additionalCriteria}`
-  const response = await openai.chat.completions.create({
+  const response = await gemini.chat.completions.create({
+    model: "gemini-2.5-flash",
     messages: [
       { role: "system", content: system },
       { role: "user", content: message }
     ],
-    model: "gpt-5-mini",
     response_format: {
       type: "json_schema",
       json_schema: {
@@ -101,14 +101,12 @@ code JSON
                   pattern_name: { type: "string" },
                   filter_string: { type: "string" },
                   description: { type: "string" },
-                  expected_results: { type: "array", items: { type: "string" } }
                 },
-                required: ["pattern_name", "filter_string", "description", "expected_results"]
+                required: ["pattern_name", "filter_string", "description"]
               }
             },
-            usage_recommendation: { type: "string" }
           },
-          required: ["summary", "filters", "usage_recommendation"]
+          required: ["summary", "filters"]
         }
       }
     }
@@ -119,4 +117,27 @@ code JSON
   
   const parsed = JSON.parse(content);
   return schema.parse(parsed);
+}
+
+export async function convertPDFtoMD(base64String : string, fileName: string){
+  const response = await openai.responses.create({
+    model: "gpt-5-mini",
+    input: [
+        {
+            role: "user",
+            content: [
+                {
+                    type: "input_file",
+                    filename: fileName,
+                    file_data: `data:application/pdf;base64,${base64String}`,
+                },
+                {
+                    type: "input_text",
+                    text: "Markdown形式にしてください。文字化けは直してください。",
+                },
+            ],
+        },
+    ],
+});
+return response.output_text
 }

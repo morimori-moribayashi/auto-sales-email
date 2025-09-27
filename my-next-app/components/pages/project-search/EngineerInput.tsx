@@ -62,7 +62,6 @@ export const EngineerInfo = ({ onGenerate , engineerInfo, setEngineerInfo}: Proj
             placeholder="スキルシートの内容を入力してください..."
             value={engineerInfo}
             onChange={(e) => setEngineerInfo(e.target.value)}
-            onPaste={() => handlePaste()}
             sx={{ 
               backgroundColor: "#fffcf2",
               "& .MuiInputBase-root": {

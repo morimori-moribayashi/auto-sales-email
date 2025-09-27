@@ -98,37 +98,9 @@ export const FilterContent = ({
               
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                 <strong>説明:</strong> {filter.description}
-              </Typography>
-              
-              {filter.expected_results.length > 0 && (
-                <Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'bold', mb: 0.5 }}>
-                    期待される結果:
-                  </Typography>
-                  {filter.expected_results.map((result, resultIndex) => (
-                    <Typography 
-                      key={resultIndex} 
-                      variant="body2" 
-                      color="text.secondary" 
-                      sx={{ ml: 1, mb: 0.5 }}
-                    >
-                      • {result}
-                    </Typography>
-                  ))}
-                </Box>
-              )}
+              </Typography>           
             </Box>
           ))}
-        </Box>
-
-        {/* Usage Recommendation Section */}
-        <Box>
-          <Typography variant="h6" sx={{ mb: 1, fontWeight: 'bold' }}>
-            使用推奨事項
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {filterContent.usage_recommendation}
-          </Typography>
         </Box>
       </Box>
     </>
