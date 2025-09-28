@@ -3,7 +3,6 @@ import React, { use, useEffect, useState } from "react";
 import { Box, Paper, Container, Button } from "@mui/material";
 import { Header } from "@/components/header/Header";
 import { SettingSideMenu } from "./SettingSideMenu";
-import { FilterContent } from "./FilterContent";
 import { AdditionalInstructions } from "./AdditonalInstructions";
 import FileDropZone from "@/components/FileDropZone/FileDropZone";
 import { SearchAndGenerateButton } from "./SearechAndGenerateButton";
@@ -90,23 +89,21 @@ export const ProjectDeepResearch = () => {
                   flexDirection: "column",
                 }}
               >
-                {loading ?
-                  <div>
+                  <div className={loading ? "": "hidden"}>
                     <ProgressIndicator label="計画を立てる" status={indicatorsStatus[0].status} />
                     <ProgressIndicator label="検索クエリの作成" status={indicatorsStatus[1].status} />
                     <ProgressIndicator label="検索" status={indicatorsStatus[2].status} />
                     <ProgressIndicator label="検索結果の分析" status={indicatorsStatus[3].status} />
                   </div>
-                  :
-                  <>
+                  <div className={loading ? "hidden":"" + " mx-auto"}>
                     <Button
                       variant="contained"
                       size="large"
                       sx={{
-                        Width: "60%",
+                        Width: "300px",
                         bgcolor: "primary.main",
                         color: "white",
-                        height: "32px",
+                        height: "50px",
                         mt: 2,
                         mb: 2,
                       }}
@@ -117,8 +114,7 @@ export const ProjectDeepResearch = () => {
                     </Button>
                     <EmailList emails={emails}/>
                     <AnalysisDialog analysisContent={analysisContent} open={analysisDialogOpen} onClose={() => {setAnalysisDialogOpen(false)}} />
-                  </>
-                }
+                  </div>
               </Paper>
             </Box>
           </Box>

@@ -33,44 +33,53 @@ export function useProjectDeepResearch(){
 
     async function parseStreamContent(response : Response){
         const decoder = new TextDecoder();
-        for await(const chunk of response.body as any){
-            const chunkText = decoder.decode(chunk);
+        const reader = response.body?.getReader();
+        if (!reader) return;
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            const chunkText = decoder.decode(value);
             try{
-                JSON.parse(chunkText)
+                const content = JSON.parse(chunkText);
+                console.log(content)
+                switch(content.type){
+                    case "plan":
+                        break;
+                    case "make_query":
+                        goToNextStep()
+                        break;
+                    case "search":
+                        goToNextStep()
+                        break;
+                    case "evaluate":
+                        goToNextStep()
+                        break;
+                    case "analyze":
+                        console.log("analyze")
+                        setAnalysisDialogOpen(true)
+                        setLoading(false)
+                        try{
+                            const emailRes = JSON.parse(content.content)
+                            console.log(emailRes)
+                            setEmails(emailRes)
+                        }catch(e){
+                            console.error(e)
+                        }
+                        break;
+                        case "content":
+                        setAnalysisDialogOpen(true)
+                        setLoading(false)
+                        setAnalysisContent(content.content)
+                        break;
+                    case "final_content":
+                        setAnalysisContent(content.content)
+                        break;
+                }
             }
             catch(e){
                 continue
-            }
-            const content = JSON.parse(chunkText);
-            switch(content.type){
-                case "plan":
-                    break;
-                case "make_query":
-                    goToNextStep()
-                    break;
-                case "search":
-                    goToNextStep()
-                    break;
-                case "evaluate":
-                    goToNextStep()
-                    break;
-                case "analyze":
-                    setAnalysisDialogOpen(true)
-                    setLoading(false)
-                    try{
-                        const emailRes = JSON.parse(content.content)
-                        console.log(emailRes)
-                        setEmails(emailRes)
-                    }catch(e){
-                        console.error(e)
-                    }
-                    break;
-                case "content":
-                    setAnalysisContent(content.content)
-                    break;
-                case "final_content":
-                    setAnalysisContent(content.content)
-                    break;
             }
         }
     }
