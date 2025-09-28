@@ -8,8 +8,9 @@ import {
   Divider,
   IconButton,
 } from "@mui/material";
-import { Home, Settings, Info, Close, Email, People } from "@mui/icons-material";
+import { Home, Settings, Info, Close, Email, People, Search, SendAndArchiveTwoTone } from "@mui/icons-material";
 import Link from "next/link";
+import { MailSearchIcon, ScanSearchIcon } from "lucide-react";
 
 interface NavigationSideMenuProps {
   open: boolean;
@@ -19,7 +20,8 @@ interface NavigationSideMenuProps {
 export const NavigationSideMenu = ({ open, onClose }: NavigationSideMenuProps) => {
   const menuItems = [
     { text: "営業メールジェネレーター", icon: <Email />, href: "/auto-sales-email" },
-    { text: "案件検索", icon: <People />, href: "/projectsearch" },
+    { text: "Gmail検索フィルタ生成", icon: <MailSearchIcon />, href: "/projectsearch" },
+    { text: "案件DeepResearch", icon: <ScanSearchIcon />, href: "/deepresearch" },
   ];
 
   return (

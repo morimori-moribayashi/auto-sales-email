@@ -75,7 +75,7 @@ from:(-(${companyEmailDomain})) (キーワード群) (キーワード群) -{除�
 return makeReadableStreamResponse(stream)
 }
 
-async function makeReadableStreamResponse(stream : Stream<ResponseStreamEvent>) {
+export async function makeReadableStreamResponse(stream : Stream<ResponseStreamEvent>) {
   return new ReadableStream({
     async start(controller) {
         function makeResponse(type: string, content: string){
