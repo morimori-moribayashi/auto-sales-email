@@ -43,7 +43,7 @@ export function useProjectDeepResearch(){
             const chunkText = decoder.decode(value);
             try{
                 const content = JSON.parse(chunkText);
-                console.log(content)
+                // console.log(content)
                 switch(content.type){
                     case "plan":
                         break;
@@ -57,12 +57,12 @@ export function useProjectDeepResearch(){
                         goToNextStep()
                         break;
                     case "analyze":
-                        console.log("analyze")
+                        // console.log("analyze")
                         setAnalysisDialogOpen(true)
                         setLoading(false)
                         try{
                             const emailRes = JSON.parse(content.content)
-                            console.log(emailRes)
+                            // console.log(emailRes)
                             setEmails(emailRes)
                         }catch(e){
                             console.error(e)
