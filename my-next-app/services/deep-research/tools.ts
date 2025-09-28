@@ -87,7 +87,7 @@ export async function planningStrategy(engineerInfo: string, additionalCriteria:
 
 ### Step 3: 創造的検索クエリ戦略立案
 
-候補者の職務経歴書と追加指示を基に、**できる限り多角的で創造的な検索クエリ作成戦略**を考案してください。既存の枠組みにとらわれず、以下の観点から独自の戦略を発想し、最低5つ、できれば10以上の戦略を提案してください：
+候補者の職務経歴書と追加指示を基に、**できる限り多角的で創造的な検索クエリ作成戦略**を考案してください。既存の枠組みにとらわれず、以下の観点から独自の戦略を発想し、最低5つの戦略を提案してください：
 
 #### 戦略発想の観点：
 
@@ -150,7 +150,7 @@ export async function planningStrategy(engineerInfo: string, additionalCriteria:
 `
   const message = `[エンジニア情報]\n${engineerInfo}\n[追加情報]\n${additionalCriteria}`
   const response = await openai.responses.parse({
-    model: "gpt-4.1",
+    model: "gpt-4.1-mini",
     input: [
       { role: "system", content: system_prompt },
       { role: "user", content: message }
@@ -371,7 +371,7 @@ ${email.body}
 ${engineerInfo}
 `
   const response = await openai.responses.parse({
-    model: "gpt-4.1",
+    model: "gpt-4.1-mini",
     input: [
       { role: "system", content: system_prompt },
       { role: "user", content: message }
@@ -436,7 +436,7 @@ export async function searchGmail(filter: string, days: number, pageSize: number
     }
     }catch(e){{
       console.log(e)
-      break;
+      continue;
     }}
   }
   const result = allResults.filter( item => {
@@ -474,8 +474,8 @@ export const analyzeResult = async (emails: GmailThreadWithGrading[],engineerInf
     }
 
     const openai = await getOpenAI()
-    const gradeA = emails.filter(item => item.grade === "A" ).slice(0,5)
-    const gradeB = emails.filter(item => item.grade === "B" ).slice(0,5)
+    const gradeA = emails.filter(item => item.grade === "A" ).slice(0,10)
+    const gradeB = emails.filter(item => item.grade === "B" ).slice(0,10)
     const gradeC = emails.filter(item => item.grade === "C" ).slice(0,5)
     const system = `
 # DeepResearch完了後のOverView出力プロンプト
@@ -510,12 +510,6 @@ DeepResearchによる案件・スキルマッチング分析が完了した後�
 - **条件交渉**: 報酬や勤務条件の調整が必要な案件
 - **スキル補強**: 参画前に習得すべき技術・知識
 - **キャリア戦略**: 中長期的なスキル開発の方向性
-
-### 5. 次のステップの提案
-ユーザーが取るべき具体的な行動を示してください：
-- 詳細データの確認方法
-- 追加分析の可能性
-- 意思決定のためのミーティング提案
 
 ## 出力形式
 
@@ -615,7 +609,9 @@ DeepResearchによる案件・スキルマッチング分析が完了した後�
   ${stringifyEmail(gradeC)}
   `
   const stream = await openai.responses.create({
-    input: [{ role: "user", content: message }],
+    input: [
+      { role: "system", content: system},
+      { role: "user", content: message }],
     model: "gpt-4.1-mini",
     stream: true,
   });

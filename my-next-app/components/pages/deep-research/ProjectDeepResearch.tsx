@@ -1,40 +1,40 @@
 "use client"
 import React, { use, useEffect, useState } from "react";
-import { Box, Paper, Container } from "@mui/material";
+import { Box, Paper, Container, Button } from "@mui/material";
 import { Header } from "@/components/header/Header";
 import { SettingSideMenu } from "./SettingSideMenu";
 import { FilterContent } from "./FilterContent";
 import { AdditionalInstructions } from "./AdditonalInstructions";
 import FileDropZone from "@/components/FileDropZone/FileDropZone";
 import { SearchAndGenerateButton } from "./SearechAndGenerateButton";
-import { useGmailFilterGeneration } from "@/hooks/useGmailFilterGeneration";
-import { deepResearch } from "@/services/deep-research/deep-research";
+import { useProjectDeepResearch } from "@/hooks/useProjectDeepResearch";
 import ProgressIndicator from "./ProgressIndicator";
+import AnalysisDialog from "./AnalysisDialog";
+import EmailList from "./EmailListPage";
 
 export const ProjectDeepResearch = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const {
-    prompt,
-    setPrompt,
     engineerInfo,
     setEngineerInfo,
-    filterContent,
-    setFilterContent,
     additionalCriteria,
     setAdditionalCriteria,
-    generateGmailFilter,
-  } = useGmailFilterGeneration()
-  
-  
+    loading,
+    emails,
+    indicatorsStatus,
+    execDeepResearch,
+    analysisContent,
+    analysisDialogOpen,
+    setAnalysisDialogOpen,
+  } = useProjectDeepResearch()
+
+
   function saveToLocalStorage() {
     localStorage.setItem("engineerInfoForProjectSearch", engineerInfo)
-    localStorage.setItem("systemPromptForProjectSearch", prompt);
   }
 
   useEffect(() => {
     setEngineerInfo(localStorage.getItem("engineerInfoForProjectSearch") ?? "");
-    setPrompt(localStorage.getItem("systemPromptForProjectSearch") ?? "");
   }, []);
 
   useEffect(() => {
@@ -42,10 +42,10 @@ export const ProjectDeepResearch = () => {
       saveToLocalStorage();
     }, 1000);
     return () => clearTimeout(timeoutId);
-  }, [engineerInfo, prompt]);
+  }, [engineerInfo]);
 
   const handleGenerate = async () => {
-    await deepResearch(engineerInfo,additionalCriteria)
+    await execDeepResearch()
   };
 
   const handleMenuToggle = () => {
@@ -58,14 +58,12 @@ export const ProjectDeepResearch = () => {
 
   return (
     <Box>
-      <Header onMenuClick={handleMenuToggle} title="案件DeepResearch"/>
-      <SettingSideMenu open={drawerOpen} 
-      onClose={handleMenuClose} 
-      systemPrompt={prompt}
-      setSystemPrompt={setPrompt}
-      engineerInfo={engineerInfo}
-      setEngineerInfo={setEngineerInfo}
-    />
+      <Header onMenuClick={handleMenuToggle} title="案件DeepResearch" />
+      <SettingSideMenu open={drawerOpen}
+        onClose={handleMenuClose}
+        engineerInfo={engineerInfo}
+        setEngineerInfo={setEngineerInfo}
+      />
 
       {/* メインコンテンツ */}
       <Box
@@ -92,14 +90,35 @@ export const ProjectDeepResearch = () => {
                   flexDirection: "column",
                 }}
               >
-                <ProgressIndicator label="計画を立てる" status="done"/>
-                <ProgressIndicator label="検索クエリの作成" status="inProgress"/>
-                <ProgressIndicator label="検索" status="notStarted"/>
-                <ProgressIndicator label="検索結果の分析" status="notStarted"/>
-                <FilterContent
-                  filterContent={filterContent}
-                  isLoading={isLoading}
-                />
+                {loading ?
+                  <div>
+                    <ProgressIndicator label="計画を立てる" status={indicatorsStatus[0].status} />
+                    <ProgressIndicator label="検索クエリの作成" status={indicatorsStatus[1].status} />
+                    <ProgressIndicator label="検索" status={indicatorsStatus[2].status} />
+                    <ProgressIndicator label="検索結果の分析" status={indicatorsStatus[3].status} />
+                  </div>
+                  :
+                  <>
+                    <Button
+                      variant="contained"
+                      size="large"
+                      sx={{
+                        Width: "60%",
+                        bgcolor: "primary.main",
+                        color: "white",
+                        height: "32px",
+                        mt: 2,
+                        mb: 2,
+                      }}
+                      disabled={loading}
+                      onClick={() => setAnalysisDialogOpen(true)}
+                    >
+                      分析結果を見る
+                    </Button>
+                    <EmailList emails={emails}/>
+                    <AnalysisDialog analysisContent={analysisContent} open={analysisDialogOpen} onClose={() => {setAnalysisDialogOpen(false)}} />
+                  </>
+                }
               </Paper>
             </Box>
           </Box>

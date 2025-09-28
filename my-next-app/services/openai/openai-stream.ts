@@ -65,7 +65,7 @@ from:(-(${companyEmailDomain})) (キーワード群) (キーワード群) -{除�
   const system = `${prompt}\n${formatInstruction}`
   const message = `[エンジニア情報]\n${engineerInfo}\n[追加情報]\n${additionalCriteria}`
   const stream = await openai.responses.create({
-    model: "gpt-4.1",
+    model: "gpt-4.1-mini",
     input: [
       { role: "system", content: system },
       { role: "user", content: message }

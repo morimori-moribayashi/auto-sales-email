@@ -9,7 +9,7 @@ interface FilterContentProps {
 }
 
 export const FilterContent = ({
-  filterContent,
+  filterContent="",
   isLoading
 }: FilterContentProps) => {
   if(isLoading) {

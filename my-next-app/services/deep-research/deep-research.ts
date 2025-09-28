@@ -35,9 +35,17 @@ export async function deepResearch(engineerInfo: string, additionalCriteria: str
                 console.log(emailsWithId.flat().map(item => item.subject))
 
                 controller.enqueue(makeResponse("evaluate", ""))
-                const gradingRes = await Promise.all(emailsWithId.map(item => evaluateMatching(item, engineerInfo, additionalCriteria)))
+                const gradingRes = []
+                const batchSize = 10
+                for (let i = 0; i < Math.max(emailsWithId.length,100); i += batchSize) {
+                    const batch = emailsWithId.slice(i, i + batchSize)
+                    const batchResults = await Promise.all(batch.map(item => evaluateMatching(item, engineerInfo, additionalCriteria)))
+                    gradingRes.push(...batchResults)
+                    console.log(`${i} / ${emailsWithId.length }`)
+                }
                 console.log(gradingRes.map(item => { return { grade: item.grade, sub: item.subject } }))
 
+                controller.enqueue(makeResponse("analyze",JSON.stringify(gradingRes)))
                 const stream = await analyzeResult(gradingRes, engineerInfo)
                 let content = "";
 

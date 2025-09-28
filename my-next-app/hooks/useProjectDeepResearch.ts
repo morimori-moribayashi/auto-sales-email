@@ -7,7 +7,8 @@ type IndicatorStatus = {
 
 function initIndicatorStatus(size : number){
     let arr: IndicatorStatus[] = []
-    for(let i=0 ; i<size ;i++){
+    arr[0] = { status: "inProgress"}
+    for(let i=1 ; i<size ;i++){
         arr[i] = { status: "notStarted"}
     }
     return arr;
@@ -20,13 +21,13 @@ export function useProjectDeepResearch(){
     const [loading,setLoading] = useState(false)
     const [emails,setEmails] = useState<GmailThreadWithGrading[]>()
     const [indicatorsStatus,setIndicatorsStatus] = useState<IndicatorStatus[]>(initIndicatorStatus(steps))
+    const [analysisContent,setAnalysisContent] = useState("")
+    const [analysisDialogOpen,setAnalysisDialogOpen] = useState(false)
 
     function goToNextStep(){
-        const currentStep = indicatorsStatus.findIndex( item => item.status == "inProgress")
-        setIndicatorsStatus( indicatorsStatus.map( (item ,index) => {
-            if(index == currentStep) return {status: "done"}
-            if(index == currentStep+1) return {status: "inProgress"}
-            return item
+        setIndicatorsStatus(prevStatus => prevStatus.map((item, index) => {
+            if(index == 0) return { status: "done" }
+            return prevStatus[index-1]
         }))
     }
 
@@ -42,16 +43,42 @@ export function useProjectDeepResearch(){
             }
             const content = JSON.parse(chunkText);
             switch(content.type){
+                case "plan":
+                    break;
+                case "make_query":
+                    goToNextStep()
+                    break;
+                case "search":
+                    goToNextStep()
+                    break;
+                case "evaluate":
+                    goToNextStep()
+                    break;
+                case "analyze":
+                    setAnalysisDialogOpen(true)
+                    setLoading(false)
+                    try{
+                        const emailRes = JSON.parse(content.content)
+                        console.log(emailRes)
+                        setEmails(emailRes)
+                    }catch(e){
+                        console.error(e)
+                    }
+                    break;
                 case "content":
+                    setAnalysisContent(content.content)
                     break;
                 case "final_content":
+                    setAnalysisContent(content.content)
                     break;
             }
         }
     }
 
     async function execDeepResearch(){
-        setLoading(true)
+        setAnalysisDialogOpen(false)
+        setIndicatorsStatus(initIndicatorStatus(steps))
+        setLoading(true) 
         const formData: FormData = new FormData();
         formData.append("engineerInfo", engineerInfo);
         formData.append("additional_criteria", additionalCriteria);
@@ -69,5 +96,23 @@ export function useProjectDeepResearch(){
         finally{
             setLoading(false)
         }
+    }
+
+    return {
+        engineerInfo,
+        setEngineerInfo,
+        additionalCriteria,
+        setAdditionalCriteria,
+        loading,
+        setLoading,
+        emails,
+        setEmails,
+        indicatorsStatus,
+        setIndicatorsStatus,
+        analysisContent,
+        setAnalysisContent,
+        analysisDialogOpen,
+        setAnalysisDialogOpen,
+        execDeepResearch,
     }
 }

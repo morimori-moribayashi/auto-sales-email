@@ -35,7 +35,7 @@ export const generateEmail = async ({emailTemplate, engineerInfo, projectContent
   const message = prompt + '\n' + context
   const response = await openai.chat.completions.create({
     messages: [{ role: "user", content: message}],
-    model: "gpt-5-mini",
+    model: "gpt-4.1-mini",
   });
   return response.choices[0].message.content;
 };
@@ -45,7 +45,7 @@ export const editEmail = async ({emailContent, editInstructions}: editEmailProps
   const message = `編集指示に従ったメール本文を修正してください。\nメール本文:\n${emailContent}\n編集指示:\n${editInstructions}`
   const response = await openai.chat.completions.create({
     messages: [{ role: "user", content: message }],
-    model: "gpt-5-mini",
+    model: "gpt-4.1-mini",
   });
   return response.choices[0].message.content;
 };
@@ -129,7 +129,7 @@ code JSON
 export async function convertPDFtoMD(base64String : string, fileName: string){
   const openai = await getOpenAI()
   const response = await openai.responses.create({
-    model: "gpt-5-mini",
+    model: "gpt-4.1-mini",
     input: [
         {
             role: "user",

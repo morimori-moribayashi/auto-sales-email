@@ -3,7 +3,6 @@ import {
   Drawer,
   Box,
   Typography,
-  TextField,
   Button,
 } from "@mui/material";
 import { EngineerInfo } from "./EngineerInput";
@@ -11,13 +10,11 @@ import { EngineerInfo } from "./EngineerInput";
 interface SideMenuProps {
   open: boolean;
   onClose: () => void;
-  systemPrompt: string;
-  setSystemPrompt: (prompt: string) => void;
   engineerInfo: string;
   setEngineerInfo: (info: string) => void;
 }
 
-export const SettingSideMenu = ({ open, onClose , systemPrompt, setSystemPrompt, engineerInfo, setEngineerInfo}: SideMenuProps) => {
+export const SettingSideMenu = ({ open, onClose , engineerInfo, setEngineerInfo}: SideMenuProps) => {
   const handleClose = (event: React.KeyboardEvent | React.MouseEvent) => {
     if (
       event.type === "keydown"
@@ -40,19 +37,7 @@ export const SettingSideMenu = ({ open, onClose , systemPrompt, setSystemPrompt,
         <Typography variant="h6" sx={{ p: 2 }}>
           システムプロンプトを入力
         </Typography>
-        <TextField
-          multiline
-          rows={20}
-          fullWidth
-          variant="outlined"
-          placeholder="システムプロンプトを入力してください。"
-          value={systemPrompt}
-          onChange={(e) => setSystemPrompt(e.target.value)}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-            },
-          }}
-        />
+
         <Button
           variant="contained"
           size="small"
