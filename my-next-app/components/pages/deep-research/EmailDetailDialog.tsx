@@ -1,6 +1,6 @@
 'use client';
 
-import { GmailThreadWithGrading } from '@/services/deep-research/tools';
+import { gmailThreadWithId } from '@/hooks/model';
 import {
   Dialog,
   DialogTitle,
@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 
 interface EmailDetailDialogProps {
-  email: GmailThreadWithGrading | null;
+  email: gmailThreadWithId | null;
   open: boolean;
   onClose: () => void;
 }

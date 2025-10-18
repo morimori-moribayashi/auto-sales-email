@@ -67,6 +67,14 @@ const gmailThreadSchema = z.object({
   date: z.date(),
 })
 
+export const gmailThreadSchemaWithId = z.object({
+  subject: z.string(),
+  body: z.string(),
+  from: z.string(),
+  date: z.date(),
+  id: z.string(),
+})
+
 // Type exports
 export type PlanningResponse = z.infer<typeof PlanningResponseSchema>;
 export type GmailFilterResponse = z.infer<typeof GmailFilterResponseSchema>;
@@ -74,3 +82,4 @@ export type MailTitleListResponse = z.infer<typeof MailTitleListResponseSchema>;
 export type gmailThreadsResponse = z.infer<typeof gmailThreadSchema>;
 export type EvaluationResponse = z.infer<typeof EvaluationResponseSchema>;
 export type ErrorResponse = z.infer<typeof ErrorResponseSchema>;
+export type gmailThreadWithId = z.infer<typeof gmailThreadSchemaWithId>;    

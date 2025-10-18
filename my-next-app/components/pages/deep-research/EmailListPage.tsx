@@ -2,17 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import EmailDetailDialog from './EmailDetailDialog';
-import { GmailThreadWithGrading } from '@/services/deep-research/tools';
+import { gmailThreadWithId } from '@/hooks/model';
 
 type EmailListProps = {
-  emails: GmailThreadWithGrading[] | undefined;
+  emails: gmailThreadWithId[] | undefined;
 };
 
 export default function EmailList({ emails }: EmailListProps) {
-  const [selectedEmail, setSelectedEmail] = useState<GmailThreadWithGrading | null>(null);
+  const [selectedEmail, setSelectedEmail] = useState<gmailThreadWithId | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const handleRowClick = (email: GmailThreadWithGrading) => {
+  const handleRowClick = (email: gmailThreadWithId) => {
     setSelectedEmail(email);
     setDialogOpen(true);
   };
@@ -30,9 +30,6 @@ export default function EmailList({ emails }: EmailListProps) {
           <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-0 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  マッチ度
-                </th>
                 <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   件名
                 </th>
@@ -52,9 +49,6 @@ export default function EmailList({ emails }: EmailListProps) {
                     className="hover:bg-gray-50 cursor-pointer"
                     onClick={() => handleRowClick(email)}
                   >
-                    <td className={`px-3 py-4 whitespace-nowrap text-sm`} style={{ maxWidth: '50px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {email.grade || '-'}
-                    </td>
                     <td className={`px-6 py-4 whitespace-nowrap text-sm`} style={{ maxWidth: '800px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {email.subject || '-'}
                     </td>

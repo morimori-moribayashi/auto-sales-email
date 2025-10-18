@@ -6,8 +6,11 @@ import {
     GmailFilterResponseSchema, 
     MailTitleListResponseSchema, 
     EvaluationResponseSchema, 
-    ErrorResponseSchema 
+    ErrorResponseSchema, 
+    gmailThreadSchemaWithId,
+    gmailThreadWithId
 } from './model';
+import z from "zod";
 
 type IndicatorStatus = {
     status: "notStarted" | "inProgress" | "done"
@@ -27,7 +30,7 @@ export function useProjectDeepResearch(){
     const [engineerInfo,setEngineerInfo] = useState("");
     const [additionalCriteria,setAdditionalCriteria] = useState("")
     const [loading,setLoading] = useState(false)
-    const [emails,setEmails] = useState<GmailThreadWithGrading[]>()
+    const [emails,setEmails] = useState<gmailThreadWithId[]>()
     const [indicatorsStatus,setIndicatorsStatus] = useState<IndicatorStatus[]>(initIndicatorStatus(steps))
     const [analysisContent,setAnalysisContent] = useState("")
     const [analysisDialogOpen,setAnalysisDialogOpen] = useState(false)
@@ -81,15 +84,16 @@ export function useProjectDeepResearch(){
                 }
             });
 
-            socket.on('mailTitleList', (data: string) => {
+            socket.on('mailThreads', (data: string) => {
                 try {
                     const parsedData = JSON.parse(data);
-                    const validated = MailTitleListResponseSchema.parse(parsedData);
-                    console.log('Mail Titles:', validated);
+                    const validated = (z.array(gmailThreadSchemaWithId)).parse(parsedData);
+                    setEmails(validated);
                     goToNextStep();
-                    socket.emit('requireEvalutation', '');
+                    socket.disconnect()
+                    setLoading(false);
                 } catch (e) {
-                    console.error('Mail title list validation error:', e);
+                    console.error('Mail list validation error:', e);
                     setLoading(false);
                 }
             });

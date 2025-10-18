@@ -171,83 +171,82 @@ export async function generateGmailFilter(engineerInfo: string, additionalCriter
   const openai = await getOpenAI()
   const companyEmailDomain = '@oneness-group.jp'
   const system_prompt = `
-    あなたは、ITエンジニアの職務経歴書を分析し、その人物のキャリアゴールに合致する高精度なGmail検索フィルターをJSON形式で自動生成するエキスパートAIです。あなたの使命は、提供された情報から候補者の強みと志向を瞬時に見抜き、複数の異なる角度から最適化されたフィルター群を一度の応答で提案することです。
+【System Prompt: Gmail Filter Design Engine v5.1 TechScout Edition】
 
-# 思考プロセス
+1. Agent Configuration
+ID: Gmail_Filter_Design_Expert
+Objective: Generate Gmail filters optimized for capturing "technical scout job offers" only.
+Core Principle: Exclusion-first.
 
-ユーザーから [スキルシート] と [追加指示] が与えられたら、以下の思考プロセスを厳密に実行し、最終的な出力を後述のMarkDownフォーマットに従って生成してください。
+2. Input Schema
+user_profile: (Text, Optional) User's resume, skill sheet.
+Keys: core_skills, experience_years, career_goals
+filter_purpose: (Text, Required) The primary goal of the filter (e.g., tech scout offers).
+custom_domain: (String, Optional, Default: oneness-group.jp)
+feedback: (Object, Optional)
+  type: Enum(LOW_HIT_COUNT, NOISE_DETECTED)
+  value: (String, Optional)
 
-Step 1: 候補者プロファイルの高速分析
+3. Processing Logic & Heuristics
+Step 1: Initialization
+  Template: from:(-(@{{custom_domain}}))
 
-    経験レベル判定: 経験年数、年齢、役職から「ジュニア」「ミドル」「シニア」のいずれかを判定する。
-	
-    コア技術の抽出: 職務経歴から、最も市場価値の高い、あるいは本人が得意とするであろう技術キーワードをリストアップする。（例: TypeScript, Next.js, Python, FastAPI, GCP, 生成AI, アジャイル）
+Step 2: Target Keyword Definition (OR Logic)
+  Action: Build (key1 OR key2 OR …) using technical stack keywords from user_profile.
 
-    経験分野の特定: 経験したプロジェクト内容から、「Webアプリ開発」「AI開発」「インフラ構築」「自社サービス開発」などの分野を特定する。
+Step 3: Strategic Condition Application (AND Logic)
+  Action: Combine OR groups with AND if necessary.
+  Heuristic: If feedback.type == LOW_HIT_COUNT → relax AND conditions, output broader filters.
+  custom_strategy: ${strategy}
 
-Step 2: 追加指示の意図解釈
+Step 4: Exclusion List Construction (NOT Logic)
+  Action: Expand exclusions into explicit Gmail syntax: 
+    -word1 -word2 -"multi word phrase"
+  Apply rules from Exclusion Dictionary:
 
-    ユーザーの [追加指示] を分析し、フィルターの方向性を決定する。
+--- Exclusion Dictionary ---
+GROUP_A: BASE_EXCLUSIONS (Always Enabled)
+  当社エンジニア
+  案件ください
+  見合う案件
+  注力要員
+  Flexibility
+  弊社正社員
+  弊社フリーランス
 
-        「アジャイル希望」→ (アジャイル OR スクラム) を必須条件に加える。
+GROUP_B: CONTEXTUAL_EXCLUSIONS
+  B1: For_Junior_Targeting → exclude 高経験者ワード (経験3年, 経験5年, シニア, リーダー, PM, PL, マネージャー, 要件定義)
+  B2: For_Senior_Targeting → exclude 未経験, 若手, 歓迎, ポテンシャル, ジュニア, 育成
+  B3: For_Tech_Focus → exclude competing technologies (例: TypeScript/React なら Java, PHP, Ruby を排除)
+  B4: For_Role_Focus → exclude competing roles (例: "フロントエンド" 狙いなら バックエンド, インフラ, SRE を排除)
 
-        「ヒット数が少ない」→ AND条件を減らし、OR条件を多用する戦略に切り替える。
+GROUP_C: USER_CONFIGURABLE_EXCLUSIONS
+  (ユーザー指定で追加/削除)
 
-        「Web系アプリ志望」→ ("Webアプリ" OR "自社サービス" OR SaaS) を必須条件に加える。
+GROUP_D: FEEDBACK_DRIVEN_EXCLUSIONS
+  動的に feedback.value から追加
+--- End Dictionary ---
 
-        「フロントエンド特化」→ フロントエンド関連技術を軸とし、バックエンド関連技術を除外キーワードに追加する。
+Step 5: Final String Concatenation
+  Assemble filter:
+    from:(-(@{{custom_domain}})) (keyword OR keyword ...) -除外ワード -"除外フレーズ"
 
-Step 3: 複数フィルター戦略の立案
+4. Output Schema & Formatting
+Type: Array<Object>
+Minimum Length: 1
+Object Schema:
+  filter_name: (String)
+  filter_string: (String)
+  rationale: (String)
+CRITICAL: filter_string must follow Gmail syntax strictly.
+Use explicit -word notation (no {} grouping).
+Multi-word phrases must be quoted.
 
-    分析結果に基づき、以下の戦略をもとにフィルターを立案する。
-
-    ${strategy}
-
-Step 4: 最適な除外キーワードの適用
-
-    立案した各戦略と候補者の経験レベルに基づき、下記の**【知識ベース：除外キーワードDB】**から適切なキーワード群を選択し、フィルターに組み込む。
-
-        ジュニア向けフィルターには、シニア・管理職向けノイズを除外リストに追加する。
-
-        汎用ノイズは、ほぼすべてのフィルターに適用する。
-
-Step 5: JSONフォーマットでの出力生成
-
-    以上の思考プロセスを経て、必ず下記のJSONフォーマットに従って最終的な回答を生成してください。 説明文などは一切不要です。出力はマークダウンのコードブロックで囲まれたJSONのみとします。
-
-# 知識ベース：除外キーワードDB
-
-    汎用ノイズ: "プロパー", "フリーランス", "案件ください", "見合う案件", "注力要員", "Flexibility"
-
-    逆営業ノイズ: "人材", "ご紹介", "ご提案", "スキルマッチ" （※ユーザーの指示で変更の可能性あり）
-
-    シニア・管理職向けノイズ: "リーダー", "PM", "PL", "マネージャー", "シニア", "テックリード", "コンサル", "要件定義", "上流工程", "経験3年", "経験5年", "即戦力"
-
-    ジュニア・未経験向けノイズ: "若手", "歓迎", "ジュニア", "育成", "監視", "運用", "アシスタント"
-  `
-  const formatInstruction = `
-# 出力フォーマット (JSON)
-code JSON
-{
-  "summary": {
-    "experience_level": "(候補者の経験レベルを文字列で記述)",
-    "core_skills": [
-      "(抽出したコア技術1)",
-      "(抽出したコア技術2)",
-      "(抽出したコア技術3)",
-      ...
-    ],
-    "strengths": "(候補者の強みを簡潔な文章で記述)"
-  },
-  "filters": [
-    {
-      "pattern_name": "【(戦略名)特化】フィルター",
-      "filter_string": "from:(-(${companyEmailDomain})) (キーワード群) (キーワード群) -{除外キーワード群}",
-      "description": "(このフィルターがどのような目的で、なぜこのキーワードを選んだのかを簡潔に説明)",
-    }
-  ],
-}
-  `
+5. Core Directives
+Prioritize recall (hit count) if feedback.type == LOW_HIT_COUNT.
+Decompose into multiple filters if too complex.
+Strict Gmail syntax compliance.
+`
   const system = `${system_prompt}\n${formatInstruction}`
   const message = `[エンジニア情報]\n${engineerInfo}\n[追加情報]\n${additionalCriteria}`
   const response = await openai.responses.parse({
@@ -392,8 +391,6 @@ ${engineerInfo}
 export async function searchGmail(filter: string, days: number, pageSize: number){
   const authToken = process.env.GAS_API_KEY?.trim() ?? ""
   const url = process.env.GAS_API_URL ?? ""
-  console.log(url)
-  console.log(authToken)
   const dateInput = new Date()
   dateInput.setDate(dateInput.getDate() - days)
 
