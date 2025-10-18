@@ -418,8 +418,7 @@ export async function searchGmail(filter: string, days: number, pageSize: number
 
     const response = res.data
     
-    console.log(response)
-
+    
     if (response.statudCode == 404) {
       break;
     }
@@ -433,6 +432,7 @@ export async function searchGmail(filter: string, days: number, pageSize: number
       break
     }
     
+    console.log(response.data.length + "件取得")
     allResults.push(...response.data)
     index += pageSize
     
