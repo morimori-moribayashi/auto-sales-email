@@ -4,8 +4,6 @@ import {io} from 'socket.io-client';
 import { 
     PlanningResponseSchema, 
     GmailFilterResponseSchema, 
-    MailTitleListResponseSchema, 
-    EvaluationResponseSchema, 
     ErrorResponseSchema, 
     gmailThreadSchemaWithId,
     gmailThreadWithId

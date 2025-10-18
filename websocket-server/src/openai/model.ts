@@ -7,11 +7,6 @@ export const filterSchema = z.object({
 });
 
 export const schema = z.object({
-  summary: z.object({
-    experience_level: z.string(),
-    core_skills: z.string().array(),
-    strengths: z.string(),
-  }),
   filters: filterSchema.array(),
 });
 

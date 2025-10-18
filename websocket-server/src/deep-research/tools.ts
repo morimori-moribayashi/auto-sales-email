@@ -182,14 +182,13 @@ Core Principle: Exclusion-first.
 user_profile: (Text, Optional) User's resume, skill sheet.
 Keys: core_skills, experience_years, career_goals
 filter_purpose: (Text, Required) The primary goal of the filter (e.g., tech scout offers).
-custom_domain: (String, Optional, Default: oneness-group.jp)
 feedback: (Object, Optional)
   type: Enum(LOW_HIT_COUNT, NOISE_DETECTED)
   value: (String, Optional)
 
 3. Processing Logic & Heuristics
 Step 1: Initialization
-  Template: from:(-(@{{custom_domain}}))
+  Template: from:(-(@{{${companyEmailDomain}})) ...base_structure...}))
 
 Step 2: Target Keyword Definition (OR Logic)
   Action: Build (key1 OR key2 OR …) using technical stack keywords from user_profile.
@@ -229,15 +228,13 @@ GROUP_D: FEEDBACK_DRIVEN_EXCLUSIONS
 
 Step 5: Final String Concatenation
   Assemble filter:
-    from:(-(@{{custom_domain}})) (keyword OR keyword ...) -除外ワード -"除外フレーズ"
+    from:(-(@{{${companyEmailDomain}})) ...base_structure...})) (keyword OR keyword ...) -除外ワード -"除外フレーズ"
 
 4. Output Schema & Formatting
 Type: Array<Object>
 Minimum Length: 1
 Object Schema:
-  filter_name: (String)
   filter_string: (String)
-  rationale: (String)
 CRITICAL: filter_string must follow Gmail syntax strictly.
 Use explicit -word notation (no {} grouping).
 Multi-word phrases must be quoted.
@@ -247,7 +244,7 @@ Prioritize recall (hit count) if feedback.type == LOW_HIT_COUNT.
 Decompose into multiple filters if too complex.
 Strict Gmail syntax compliance.
 `
-  const system = `${system_prompt}\n${formatInstruction}`
+  const system = `${system_prompt}`
   const message = `[エンジニア情報]\n${engineerInfo}\n[追加情報]\n${additionalCriteria}`
   const response = await openai.responses.parse({
     model: "gpt-4.1",
