@@ -109,8 +109,7 @@ export class SocketHandlers {
             state.threads = state.threads.slice(0, config.MAX_THREADS_TO_PROCESS);
             state.threadsWithId = addIdToGmailThreads(state.threads);
             
-            const mailTitleList = state.threads.map(item => item.subject);
-            socket.emit('mailTitleList', JSON.stringify({ threads: mailTitleList }));
+            socket.emit('mailThreads', JSON.stringify({ threads: state.threadsWithId }));
         } catch (error) {
             logger.error('Gmail response error', { error });
             socket.emit('error', error);
