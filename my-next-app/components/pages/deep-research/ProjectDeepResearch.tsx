@@ -44,7 +44,7 @@ export const ProjectDeepResearch = () => {
   }, [engineerInfo]);
 
   const handleGenerate = async () => {
-    await execDeepResearch()
+    execDeepResearch()
   };
 
   const handleMenuToggle = () => {

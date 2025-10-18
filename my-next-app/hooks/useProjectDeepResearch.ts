@@ -1,5 +1,13 @@
 import { GmailThreadWithGrading } from "@/services/deep-research/tools";
 import { useState } from "react";
+import {io} from 'socket.io-client';
+import { 
+    PlanningResponseSchema, 
+    GmailFilterResponseSchema, 
+    MailTitleListResponseSchema, 
+    EvaluationResponseSchema, 
+    ErrorResponseSchema 
+} from './model';
 
 type IndicatorStatus = {
     status: "notStarted" | "inProgress" | "done"
@@ -31,78 +39,90 @@ export function useProjectDeepResearch(){
         }))
     }
 
-    async function parseStreamContent(response : Response){
-        const decoder = new TextDecoder();
-        const reader = response.body?.getReader();
-        if (!reader) return;
-
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            
-            const chunkText = decoder.decode(value);
-            try{
-                const content = JSON.parse(chunkText);
-                // console.log(content)
-                switch(content.type){
-                    case "plan":
-                        break;
-                    case "make_query":
-                        goToNextStep()
-                        break;
-                    case "search":
-                        goToNextStep()
-                        break;
-                    case "evaluate":
-                        goToNextStep()
-                        break;
-                    case "analyze":
-                        // console.log("analyze")
-                        setAnalysisDialogOpen(true)
-                        setLoading(false)
-                        try{
-                            const emailRes = JSON.parse(content.content)
-                            // console.log(emailRes)
-                            setEmails(emailRes)
-                        }catch(e){
-                            console.error(e)
-                        }
-                        break;
-                        case "content":
-                        setAnalysisDialogOpen(true)
-                        setLoading(false)
-                        setAnalysisContent(content.content)
-                        break;
-                    case "final_content":
-                        setAnalysisContent(content.content)
-                        break;
-                }
-            }
-            catch(e){
-                continue
-            }
-        }
-    }
-
     async function execDeepResearch(){
-        setAnalysisDialogOpen(false)
-        setIndicatorsStatus(initIndicatorStatus(steps))
-        setLoading(true) 
-        const formData: FormData = new FormData();
-        formData.append("engineerInfo", engineerInfo);
-        formData.append("additional_criteria", additionalCriteria);
-
+        const sendData = {
+            engineerInfo,
+            additionalCriteria,
+        }
+        const socket = io(process.env.NEXT_PUBLIC_DEEP_RESEARCH_SOCKET_URL || "http://localhost:8000");
         try {
-            const response = await fetch("/api/deepresearch/projects", {
-                method: "POST",
-                body: formData,
+            // 接続時にこのイベントが発火する
+            socket.on('connect', async () => {
+                setAnalysisDialogOpen(false)
+                setIndicatorsStatus(initIndicatorStatus(steps))
+                setLoading(true) 
+                console.log('Connected to server');
+                socket.emit('requirePlannning', JSON.stringify(sendData));
             });
-            await parseStreamContent(response)
+
+            socket.on('planningResponse', (data: string) => {
+                try {
+                    const parsedData = JSON.parse(data);
+                    const validated = PlanningResponseSchema.parse(parsedData);
+                    console.log('Planning:', validated);
+                    goToNextStep();
+                    socket.emit('requireGmailFilter', '');
+                } catch (e) {
+                    console.error('Planning response validation error:', e);
+                    setLoading(false);
+                }
+            });
+
+            socket.on('gmailFilterResponse', (data: string) => {
+                try {
+                    const parsedData = JSON.parse(data);
+                    const validated = GmailFilterResponseSchema.parse(parsedData);
+                    console.log('Gmail Filter:', validated);
+                    goToNextStep();
+                    socket.emit('requireGmailResponse', '');
+                } catch (e) {
+                    console.error('Gmail filter response validation error:', e);
+                    setLoading(false);
+                }
+            });
+
+            socket.on('mailTitleList', (data: string) => {
+                try {
+                    const parsedData = JSON.parse(data);
+                    const validated = MailTitleListResponseSchema.parse(parsedData);
+                    console.log('Mail Titles:', validated);
+                    goToNextStep();
+                    socket.emit('requireEvalutation', '');
+                } catch (e) {
+                    console.error('Mail title list validation error:', e);
+                    setLoading(false);
+                }
+            });
+
+            // socket.on('evaluationResponse', (data: string) => {
+            //     try {
+            //         const parsedData = JSON.parse(data);
+            //         const validated = EvaluationResponseSchema.parse(parsedData);
+            //         console.log('Evaluation:', validated);
+            //         setAnalysisDialogOpen(true);
+            //         setLoading(false);
+            //         setEmails(validated.threadsWithGradings);
+            //     } catch (e) {
+            //         console.error('Evaluation response validation error:', e);
+            //         setLoading(false);
+            //     }
+            // });
+
+            socket.on('error', (error: any) => {
+                try {
+                    const validated = ErrorResponseSchema.parse(error);
+                    console.error('Socket error:', validated);
+                } catch (e) {
+                    console.error('Socket error (unvalidated):', error);
+                }
+                setLoading(false);
+            });
         }
         catch(e){
             console.error(e)
         }
         finally{
+            socket.disconnect
             setLoading(false)
         }
     }
