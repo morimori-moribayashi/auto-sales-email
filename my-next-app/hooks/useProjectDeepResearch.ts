@@ -45,6 +45,19 @@ function createSocketEventHandlers(
         setLoading(false);
     };
 
+    function deduplicateEmailsBySubject(emails: gmailThreadWithId[]): gmailThreadWithId[] {
+        const seenSubjects = new Set<string>();
+        const deduplicated: gmailThreadWithId[] = [];
+        
+        for (const email of emails) {
+            if (!seenSubjects.has(email.subject)) {
+                seenSubjects.add(email.subject);
+                deduplicated.push(email);
+            }
+        }
+        return deduplicated;
+    }
+
     return {
         onConnect: () => {
             console.log('Connected to server');
@@ -77,8 +90,10 @@ function createSocketEventHandlers(
         onMailThreads: (data: string) => {
             try {
                 const parsedData = JSON.parse(data);
-                const validated = z.array(gmailThreadSchemaWithId).parse(parsedData);
-                setEmails(validated);
+                console.log(parsedData)
+                const validated = z.array(gmailThreadSchemaWithId).parse(parsedData.threads);
+                const deduplicated = deduplicateEmailsBySubject(validated);
+                setEmails(deduplicated);
                 goToNextStep();
                 socket.disconnect();
                 setLoading(false);

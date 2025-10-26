@@ -71,8 +71,8 @@ export const gmailThreadSchemaWithId = z.object({
   subject: z.string(),
   body: z.string(),
   from: z.string(),
-  date: z.date(),
-  id: z.string(),
+  date: z.string(),
+  id: z.number(),
 })
 
 // Type exports
