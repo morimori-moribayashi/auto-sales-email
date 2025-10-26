@@ -52,7 +52,7 @@ export const editEmail = async ({emailContent, editInstructions}: editEmailProps
 
 export async function generateGmailFilter(prompt: string, engineerInfo: string, additionalCriteria: string, history?: string){
   const gemini = await getGemini()
-  const companyEmailDomain = '@oneness-group.jp'
+  const companyEmailDomain = process.env.DEFAULT_EMAIL_DOMAIN
   const formatInstruction = `
 # 出力フォーマット (JSON)
 code JSON

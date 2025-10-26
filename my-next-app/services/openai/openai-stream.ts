@@ -41,7 +41,7 @@ export const editEmail = async ({emailContent, editInstructions}: editEmailProps
 
 export async function generateGmailFilterStream(prompt: string, engineerInfo: string, additionalCriteria: string, history?: string){
   const openai = await getOpenAI()
-  const companyEmailDomain = '@oneness-group.jp'
+  const companyEmailDomain = process.env.DEFAULT_EMAIL_DOMAIN
   const formatInstruction = `
 # 出力形式(markdown)
 

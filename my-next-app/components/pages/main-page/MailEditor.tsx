@@ -10,6 +10,7 @@ import { editEmail, generateEmail } from "@/services/openai/openai";
 import FileDropZone from "../../FileDropZone/FileDropZone";
 import EngineerInfoHistoryDialog from "../../FileDropZone/EngineerInfoHistoryDialog";
 import { useEmailGeneration } from "@/hooks/useEmailGeneration";
+import { emailGenerationDefaultPrompt, emailGenerationDefaultTemplate } from "@/util/prompts";
 
 export const MailEditor = () => {
   const {
@@ -39,8 +40,8 @@ export const MailEditor = () => {
 
   useEffect(() => {
     setEngineerInfo(localStorage.getItem("engineerInfo") ?? "");
-    setEmailTemplate(localStorage.getItem("emailTemplate") ?? "");
-    setPrompt(localStorage.getItem("systemPrompt") ?? "");
+    setEmailTemplate(localStorage.getItem("emailTemplate") ?? emailGenerationDefaultTemplate);
+    setPrompt(localStorage.getItem("systemPrompt") ?? emailGenerationDefaultPrompt);
   }, []);
 
   useEffect(() => {

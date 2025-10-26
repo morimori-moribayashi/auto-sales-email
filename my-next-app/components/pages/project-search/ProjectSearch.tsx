@@ -8,6 +8,7 @@ import { AdditionalInstructions } from "./AdditonalInstructions";
 import FileDropZone from "@/components/FileDropZone/FileDropZone";
 import { SearchAndGenerateButton } from "./SearechAndGenerateButton";
 import { useGmailFilterGeneration } from "@/hooks/useGmailFilterGeneration";
+import { gmailFilterDefaultPrompt } from "@/util/prompts";
 
 export const ProjectSearch = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -32,7 +33,7 @@ export const ProjectSearch = () => {
 
   useEffect(() => {
     setEngineerInfo(localStorage.getItem("engineerInfoForProjectSearch") ?? "");
-    setPrompt(localStorage.getItem("systemPromptForProjectSearch") ?? "");
+    setPrompt(localStorage.getItem("systemPromptForProjectSearch") ?? gmailFilterDefaultPrompt);
   }, []);
 
   useEffect(() => {

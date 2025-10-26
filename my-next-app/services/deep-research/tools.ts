@@ -167,7 +167,7 @@ export async function planningStrategy(engineerInfo: string, additionalCriteria:
 
 export async function generateGmailFilter(engineerInfo: string, additionalCriteria: string, strategy: string, history?: string){
   const openai = await getOpenAI()
-  const companyEmailDomain = '@oneness-group.jp'
+  const companyEmailDomain = process.env.DEFAULT_EMAIL_DOMAIN
   const system_prompt = `
     あなたは、ITエンジニアの職務経歴書を分析し、その人物のキャリアゴールに合致する高精度なGmail検索フィルターをJSON形式で自動生成するエキスパートAIです。あなたの使命は、提供された情報から候補者の強みと志向を瞬時に見抜き、複数の異なる角度から最適化されたフィルター群を一度の応答で提案することです。
 
