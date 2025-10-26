@@ -1,6 +1,5 @@
-import { GmailThreadWithGrading } from "@/services/deep-research/tools";
-import { useState } from "react";
-import {io} from 'socket.io-client';
+import { useState, useCallback } from "react";
+import { io, Socket } from 'socket.io-client';
 import { 
     PlanningResponseSchema, 
     GmailFilterResponseSchema, 
@@ -11,123 +10,149 @@ import {
 import z from "zod";
 
 type IndicatorStatus = {
-    status: "notStarted" | "inProgress" | "done"
+    status: "notStarted" | "inProgress" | "done";
 }
 
-function initIndicatorStatus(size : number){
-    let arr: IndicatorStatus[] = []
-    arr[0] = { status: "inProgress"}
-    for(let i=1 ; i<size ;i++){
-        arr[i] = { status: "notStarted"}
-    }
+type DeepResearchData = {
+    engineerInfo: string;
+    additionalCriteria: string;
+}
+
+type SocketEventHandlers = {
+    onConnect: () => void;
+    onPlanningResponse: (data: string) => void;
+    onGmailFilterResponse: (data: string) => void;
+    onMailThreads: (data: string) => void;
+    onError: (error: any) => void;
+}
+
+const STEPS = 4;
+
+function initIndicatorStatus(size: number): IndicatorStatus[] {
+    const arr: IndicatorStatus[] = Array(size).fill({ status: "notStarted" });
+    arr[0] = { status: "inProgress" };
     return arr;
 }
 
-export function useProjectDeepResearch(){
-    const steps = 4;
-    const [engineerInfo,setEngineerInfo] = useState("");
-    const [additionalCriteria,setAdditionalCriteria] = useState("")
-    const [loading,setLoading] = useState(false)
-    const [emails,setEmails] = useState<gmailThreadWithId[]>()
-    const [indicatorsStatus,setIndicatorsStatus] = useState<IndicatorStatus[]>(initIndicatorStatus(steps))
-    const [analysisContent,setAnalysisContent] = useState("")
-    const [analysisDialogOpen,setAnalysisDialogOpen] = useState(false)
+function createSocketEventHandlers(
+    goToNextStep: () => void,
+    setEmails: (emails: gmailThreadWithId[]) => void,
+    setLoading: (loading: boolean) => void,
+    socket: Socket
+): SocketEventHandlers {
+    const handleParseError = (error: unknown, context: string) => {
+        console.error(`${context} validation error:`, error);
+        setLoading(false);
+    };
 
-    function goToNextStep(){
+    return {
+        onConnect: () => {
+            console.log('Connected to server');
+        },
+        
+        onPlanningResponse: (data: string) => {
+            try {
+                const parsedData = JSON.parse(data);
+                const validated = PlanningResponseSchema.parse(parsedData);
+                console.log('Planning:', validated);
+                goToNextStep();
+                socket.emit('requireGmailFilter', '');
+            } catch (error) {
+                handleParseError(error, 'Planning response');
+            }
+        },
+
+        onGmailFilterResponse: (data: string) => {
+            try {
+                const parsedData = JSON.parse(data);
+                const validated = GmailFilterResponseSchema.parse(parsedData);
+                console.log('Gmail Filter:', validated);
+                goToNextStep();
+                socket.emit('requireGmailResponse', '');
+            } catch (error) {
+                handleParseError(error, 'Gmail filter response');
+            }
+        },
+
+        onMailThreads: (data: string) => {
+            try {
+                const parsedData = JSON.parse(data);
+                const validated = z.array(gmailThreadSchemaWithId).parse(parsedData);
+                setEmails(validated);
+                goToNextStep();
+                socket.disconnect();
+                setLoading(false);
+            } catch (error) {
+                handleParseError(error, 'Mail list');
+            }
+        },
+
+        onError: (error: any) => {
+            try {
+                const validated = ErrorResponseSchema.parse(error);
+                console.error('Socket error:', validated);
+            } catch {
+                console.error('Socket error (unvalidated):', error);
+            }
+            setLoading(false);
+        }
+    };
+}
+
+function setupSocketListeners(socket: Socket, handlers: SocketEventHandlers, data: DeepResearchData) {
+    socket.on('connect', () => {
+        handlers.onConnect();
+        socket.emit('requirePlannning', JSON.stringify(data));
+    });
+
+    socket.on('planningResponse', handlers.onPlanningResponse);
+    socket.on('gmailFilterResponse', handlers.onGmailFilterResponse);
+    socket.on('mailThreads', handlers.onMailThreads);
+    socket.on('error', handlers.onError);
+}
+
+export function useProjectDeepResearch() {
+    const [engineerInfo, setEngineerInfo] = useState("");
+    const [additionalCriteria, setAdditionalCriteria] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [emails, setEmails] = useState<gmailThreadWithId[]>();
+    const [indicatorsStatus, setIndicatorsStatus] = useState<IndicatorStatus[]>(initIndicatorStatus(STEPS));
+    const [analysisContent, setAnalysisContent] = useState("");
+    const [analysisDialogOpen, setAnalysisDialogOpen] = useState(false);
+
+    const goToNextStep = useCallback(() => {
         setIndicatorsStatus(prevStatus => prevStatus.map((item, index) => {
-            if(index == 0) return { status: "done" }
-            return prevStatus[index-1]
-        }))
-    }
+            if (index === 0) return { status: "done" };
+            return prevStatus[index - 1];
+        }));
+    }, []);
 
-    async function execDeepResearch(){
-        const sendData = {
+    const resetState = useCallback(() => {
+        setAnalysisDialogOpen(false);
+        setIndicatorsStatus(initIndicatorStatus(STEPS));
+        setLoading(true);
+    }, []);
+
+    const execDeepResearch = useCallback(async () => {
+        const sendData: DeepResearchData = {
             engineerInfo,
             additionalCriteria,
-        }
-        const socket = io(process.env.NEXT_PUBLIC_DEEP_RESEARCH_SOCKET_URL || "http://localhost:8000");
+        };
+
+        const socketUrl = process.env.NEXT_PUBLIC_DEEP_RESEARCH_SOCKET_URL || "http://localhost:8000";
+        const socket = io(socketUrl);
+        
+        resetState();
+
         try {
-            // 接続時にこのイベントが発火する
-            socket.on('connect', async () => {
-                setAnalysisDialogOpen(false)
-                setIndicatorsStatus(initIndicatorStatus(steps))
-                setLoading(true) 
-                console.log('Connected to server');
-                socket.emit('requirePlannning', JSON.stringify(sendData));
-            });
-
-            socket.on('planningResponse', (data: string) => {
-                try {
-                    const parsedData = JSON.parse(data);
-                    const validated = PlanningResponseSchema.parse(parsedData);
-                    console.log('Planning:', validated);
-                    goToNextStep();
-                    socket.emit('requireGmailFilter', '');
-                } catch (e) {
-                    console.error('Planning response validation error:', e);
-                    setLoading(false);
-                }
-            });
-
-            socket.on('gmailFilterResponse', (data: string) => {
-                try {
-                    const parsedData = JSON.parse(data);
-                    const validated = GmailFilterResponseSchema.parse(parsedData);
-                    console.log('Gmail Filter:', validated);
-                    goToNextStep();
-                    socket.emit('requireGmailResponse', '');
-                } catch (e) {
-                    console.error('Gmail filter response validation error:', e);
-                    setLoading(false);
-                }
-            });
-
-            socket.on('mailThreads', (data: string) => {
-                try {
-                    const parsedData = JSON.parse(data);
-                    const validated = (z.array(gmailThreadSchemaWithId)).parse(parsedData);
-                    setEmails(validated);
-                    goToNextStep();
-                    socket.disconnect()
-                    setLoading(false);
-                } catch (e) {
-                    console.error('Mail list validation error:', e);
-                    setLoading(false);
-                }
-            });
-
-            // socket.on('evaluationResponse', (data: string) => {
-            //     try {
-            //         const parsedData = JSON.parse(data);
-            //         const validated = EvaluationResponseSchema.parse(parsedData);
-            //         console.log('Evaluation:', validated);
-            //         setAnalysisDialogOpen(true);
-            //         setLoading(false);
-            //         setEmails(validated.threadsWithGradings);
-            //     } catch (e) {
-            //         console.error('Evaluation response validation error:', e);
-            //         setLoading(false);
-            //     }
-            // });
-
-            socket.on('error', (error: any) => {
-                try {
-                    const validated = ErrorResponseSchema.parse(error);
-                    console.error('Socket error:', validated);
-                } catch (e) {
-                    console.error('Socket error (unvalidated):', error);
-                }
-                setLoading(false);
-            });
+            const handlers = createSocketEventHandlers(goToNextStep, setEmails, setLoading, socket);
+            setupSocketListeners(socket, handlers, sendData);
+        } catch (error) {
+            console.error('Socket setup error:', error);
+            setLoading(false);
+            socket.disconnect();
         }
-        catch(e){
-            console.error(e)
-        }
-        finally{
-            socket.disconnect
-            setLoading(false)
-        }
-    }
+    }, [engineerInfo, additionalCriteria, resetState]);
 
     return {
         engineerInfo,
@@ -145,5 +170,5 @@ export function useProjectDeepResearch(){
         analysisDialogOpen,
         setAnalysisDialogOpen,
         execDeepResearch,
-    }
+    };
 }

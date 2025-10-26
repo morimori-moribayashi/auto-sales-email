@@ -431,7 +431,7 @@ export async function searchGmail(filter: string, days: number, pageSize: number
     if (!response.data || response.data.length === 0) {
       break
     }
-    
+    console.log("current index:"+index)
     console.log(response.data.length + "件取得")
     allResults.push(...response.data)
     index += pageSize
