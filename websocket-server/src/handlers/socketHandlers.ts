@@ -12,6 +12,7 @@ import {
 } from '../deep-research/tools';
 import { config } from '../config/config';
 import { logger } from '../utils/logger';
+import { searchGmailFull } from '../gmail/gmail';
 
 interface SocketState {
     engineerInfo: string;
@@ -94,19 +95,18 @@ export class SocketHandlers {
 
     private async handleGmailResponse(socket: Socket, request: string, state: SocketState): Promise<void> {
         logger.info('Gmail response request received', { request });
-        
         try {
-            for await (const filter of state.filters) {
-                const res = await searchGmail(
-                    filter, 
-                    config.GMAIL_SEARCH_RESULTS_PER_FILTER, 
-                    config.GMAIL_SEARCH_MAX_RESULTS
-                );
-                state.threads.push(...res);
+            const result = await searchGmailFull(state.filters, config.GMAIL_SEARCH_MAX_RESULTS);
+            if (!result.success) {
+                throw new Error(result.error || 'Gmail search failed');
             }
-
+            state.threads = result.messages.map(msg => ({
+                from: msg.from ?? "",
+                subject: msg.subject ?? "",
+                body: msg.body ?? "",
+                date: new Date(msg.date ?? "")
+            }));
             state.threads = deduplicateGmailThreads(state.threads);
-            state.threads = state.threads.slice(0, config.MAX_THREADS_TO_PROCESS);
             state.threadsWithId = addIdToGmailThreads(state.threads);
             
             socket.emit('mailThreads', JSON.stringify({ threads: state.threadsWithId }));
