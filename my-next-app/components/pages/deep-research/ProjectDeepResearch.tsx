@@ -1,6 +1,6 @@
 "use client"
 import React, { use, useEffect, useState } from "react";
-import { Box, Paper, Container, Button } from "@mui/material";
+import { Box, Paper, Container, Button, Typography } from "@mui/material";
 import { Header } from "@/components/header/Header";
 import { SettingSideMenu } from "./SettingSideMenu";
 import { AdditionalInstructions } from "./AdditonalInstructions";
@@ -89,14 +89,17 @@ export const ProjectDeepResearch = () => {
                   flexDirection: "column",
                 }}
               >
-                  <div className={loading ? "": "hidden"}>
-                    <ProgressIndicator label="計画を立てる" status={indicatorsStatus[0].status} />
-                    <ProgressIndicator label="検索クエリの作成" status={indicatorsStatus[1].status} />
-                    <ProgressIndicator label="検索" status={indicatorsStatus[2].status} />
-                    <ProgressIndicator label="検索結果の分析" status={indicatorsStatus[3].status} />
-                  </div>
-                  <div className={loading ? "hidden":"" + " mx-auto"}>
-                    <Button
+                <div className={loading ? "" : "hidden"}>
+                  <ProgressIndicator label="計画を立てる" status={indicatorsStatus[0].status} />
+                  <ProgressIndicator label="検索クエリの作成" status={indicatorsStatus[1].status} />
+                  <ProgressIndicator label="検索" status={indicatorsStatus[2].status} />
+                  {/* <ProgressIndicator label="検索結果の分析" status={indicatorsStatus[3].status} /> */}
+                </div>
+                <div className={loading ? "hidden" : "" + " mx-auto"}>
+                  <Typography variant="h6" component="h2" fontWeight={600}>
+                    検索結果　{emails ? `(${emails.length}件)` : ""}
+                  </Typography>
+                  {/* <Button
                       variant="contained"
                       size="large"
                       sx={{
@@ -111,10 +114,10 @@ export const ProjectDeepResearch = () => {
                       onClick={() => setAnalysisDialogOpen(true)}
                     >
                       分析結果を見る
-                    </Button>
-                    <EmailList emails={emails}/>
-                    <AnalysisDialog analysisContent={analysisContent} open={analysisDialogOpen} onClose={() => {setAnalysisDialogOpen(false)}} />
-                  </div>
+                    </Button> */}
+                  <EmailList emails={emails} />
+                  <AnalysisDialog analysisContent={analysisContent} open={analysisDialogOpen} onClose={() => { setAnalysisDialogOpen(false) }} />
+                </div>
               </Paper>
             </Box>
           </Box>

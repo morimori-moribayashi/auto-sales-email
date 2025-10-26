@@ -27,7 +27,7 @@ export const SearchAndGenerateButton = ({ onGenerate }: ProjectContentProps) => 
           }}
         >
           <Typography variant="h6" component="h2" fontWeight={600}>
-            DeepResearchを開始する
+            Researchを開始する
           </Typography>
           <Button
             variant="contained"
