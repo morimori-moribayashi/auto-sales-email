@@ -21,7 +21,7 @@ export const NavigationSideMenu = ({ open, onClose }: NavigationSideMenuProps) =
   const menuItems = [
     { text: "営業メールジェネレーター", icon: <Email />, href: "/auto-sales-email" },
     { text: "Gmail検索フィルタ生成", icon: <MailSearchIcon />, href: "/projectsearch" },
-    { text: "案件DeepResearch", icon: <ScanSearchIcon />, href: "/deepresearch" },
+    { text: "案件Research", icon: <ScanSearchIcon />, href: "/deepresearch" },
   ];
 
   return (

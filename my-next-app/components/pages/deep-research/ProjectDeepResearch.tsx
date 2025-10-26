@@ -57,7 +57,7 @@ export const ProjectDeepResearch = () => {
 
   return (
     <Box>
-      <Header onMenuClick={handleMenuToggle} title="案件DeepResearch" />
+      <Header onMenuClick={handleMenuToggle} title="案件Research" />
       <SettingSideMenu open={drawerOpen}
         onClose={handleMenuClose}
         engineerInfo={engineerInfo}
