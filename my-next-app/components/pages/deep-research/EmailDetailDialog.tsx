@@ -16,9 +16,11 @@ interface EmailDetailDialogProps {
   email: gmailThreadWithId | null;
   open: boolean;
   onClose: () => void;
+  selectNextEmail: () => void;
+  selectPreviousEmail: () => void;
 }
 
-export default function EmailDetailDialog({ email, open, onClose }: EmailDetailDialogProps) {
+export default function EmailDetailDialog({ email, open, onClose , selectNextEmail, selectPreviousEmail}: EmailDetailDialogProps) {
   if (!email) return null;
 
   const formatDate = (dateString: string | null) => {
@@ -26,8 +28,17 @@ export default function EmailDetailDialog({ email, open, onClose }: EmailDetailD
     return new Date(dateString).toLocaleString('ja-JP');
   };
 
+  function handleArrwoKeyPress(event: React.KeyboardEvent) {
+    if (event.key === 'ArrowRight') {
+      selectNextEmail();
+    }
+    if (event.key === 'ArrowLeft') {
+      selectPreviousEmail();
+    }
+  }
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xl" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="xl" fullWidth onKeyDown={handleArrwoKeyPress}>
       <DialogTitle>
         メール詳細
       </DialogTitle>

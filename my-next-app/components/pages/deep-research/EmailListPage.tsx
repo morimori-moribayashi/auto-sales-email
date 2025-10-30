@@ -17,6 +17,20 @@ export default function EmailList({ emails }: EmailListProps) {
     setDialogOpen(true);
   };
 
+  function selectNextEmail() {
+    if (!selectedEmail || !emails) return;
+    const currentIndex = emails.findIndex(email => email.id === selectedEmail.id);
+    if (currentIndex === -1 || currentIndex === emails.length - 1) return;
+    setSelectedEmail(emails[currentIndex + 1]);
+  }
+
+  function selectPreviousEmail() {
+    if (!selectedEmail || !emails) return;
+    const currentIndex = emails.findIndex(email => email.id === selectedEmail.id);
+    if (currentIndex <= 0) return;
+    setSelectedEmail(emails[currentIndex - 1]);
+  }
+
   const handleCloseDialog = () => {
     setDialogOpen(false);
     setSelectedEmail(null);
@@ -74,6 +88,8 @@ export default function EmailList({ emails }: EmailListProps) {
         email={selectedEmail}
         open={dialogOpen}
         onClose={handleCloseDialog}
+        selectNextEmail={selectNextEmail}
+        selectPreviousEmail={selectPreviousEmail}
       />
     </div>
   );
