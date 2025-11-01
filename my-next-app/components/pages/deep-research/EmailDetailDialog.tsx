@@ -11,6 +11,7 @@ import {
   Box,
   Divider
 } from '@mui/material';
+import parse from 'html-react-parser';
 
 interface EmailDetailDialogProps {
   email: gmailThreadWithId | null;
@@ -22,6 +23,12 @@ interface EmailDetailDialogProps {
 
 export default function EmailDetailDialog({ email, open, onClose , selectNextEmail, selectPreviousEmail}: EmailDetailDialogProps) {
   if (!email) return null;
+  let bodyContent;
+  try {
+    bodyContent = parse(email.body || '');
+  } catch (error) {
+    bodyContent = email.body || '本文の解析に失敗しました';
+  }
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '-';
@@ -85,17 +92,16 @@ export default function EmailDetailDialog({ email, open, onClose , selectNextEma
           <Typography variant="subtitle2" color="text.secondary" gutterBottom>
             本文
           </Typography>
-          <Typography 
-            variant="body1" 
-            sx={{ 
+          <div 
+            style={{ 
               whiteSpace: 'pre-wrap',
               backgroundColor: '#f5f5f5',
               padding: 2,
               borderRadius: 1
             }}
           >
-            {email.body || '本文がありません'}
-          </Typography>
+            { bodyContent || '本文がありません'}
+          </div>
         </Box>
       </DialogContent>
 

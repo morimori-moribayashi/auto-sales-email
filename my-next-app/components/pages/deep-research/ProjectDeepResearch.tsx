@@ -55,6 +55,19 @@ export const ProjectDeepResearch = () => {
     setDrawerOpen(false);
   };
 
+  useEffect(() => {
+    localStorage.setItem("deepResearchEmails", JSON.stringify(emails));
+  }, [emails]);
+
+  useEffect(() => {
+    localStorage.setItem("deepResearchAdditionalCriteria", additionalCriteria);
+  }, [additionalCriteria]);
+
+  useEffect(() => {
+    localStorage.getItem("deepResearchEmails");
+    localStorage.getItem("deepResearchAdditionalCriteria");
+  }, []);
+
   return (
     <Box>
       <Header onMenuClick={handleMenuToggle} title="案件Research" />
