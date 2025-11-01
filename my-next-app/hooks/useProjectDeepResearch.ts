@@ -137,7 +137,6 @@ export function useProjectDeepResearch() {
     const [analysisDialogOpen, setAnalysisDialogOpen] = useState(false);
 
     useEffect(() => {
-        console.log(emails)
         if (emails) {
             localStorage.setItem("deepResearchEmails", JSON.stringify(emails));
         }
@@ -151,7 +150,6 @@ export function useProjectDeepResearch() {
         try {
             const prevEmails = localStorage.getItem("deepResearchEmails");
             const prevCriteria = localStorage.getItem("deepResearchAdditionalCriteria");
-            console.log(prevEmails);
             if (prevEmails) {
                 setEmails(JSON.parse(prevEmails));
             }
