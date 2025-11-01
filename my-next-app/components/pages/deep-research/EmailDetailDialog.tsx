@@ -30,11 +30,6 @@ export default function EmailDetailDialog({ email, open, onClose , selectNextEma
     bodyContent = email.body || '本文の解析に失敗しました';
   }
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleString('ja-JP');
-  };
-
   function handleArrwoKeyPress(event: React.KeyboardEvent) {
     if (event.key === 'ArrowRight') {
       selectNextEmail();
@@ -51,7 +46,9 @@ export default function EmailDetailDialog({ email, open, onClose , selectNextEma
       </DialogTitle>
       
       <DialogContent>
-        <Box sx={{ 
+        <div className='grid grid-cols-3'>
+          <div className='col-span-2 pr-4'>
+                    <Box sx={{ 
           display: 'grid', 
           gridTemplateColumns: '1fr 1fr',
           gap: 1,
@@ -103,6 +100,12 @@ export default function EmailDetailDialog({ email, open, onClose , selectNextEma
             { bodyContent || '本文がありません'}
           </div>
         </Box>
+          </div>
+          <div>
+            hogehoge
+          </div>
+        </div>
+
       </DialogContent>
 
       <DialogActions>
