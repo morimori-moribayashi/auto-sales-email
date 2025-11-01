@@ -25,6 +25,7 @@ export const ProjectDeepResearch = () => {
     analysisContent,
     analysisDialogOpen,
     setAnalysisDialogOpen,
+    setEmails
   } = useProjectDeepResearch()
 
 
@@ -64,8 +65,14 @@ export const ProjectDeepResearch = () => {
   }, [additionalCriteria]);
 
   useEffect(() => {
-    localStorage.getItem("deepResearchEmails");
-    localStorage.getItem("deepResearchAdditionalCriteria");
+    const prevEmails = localStorage.getItem("deepResearchEmails");
+    const prevCriteria = localStorage.getItem("deepResearchAdditionalCriteria");
+    if (prevEmails) {
+      setEmails(JSON.parse(prevEmails));
+    }
+    if (prevCriteria) {
+      setAdditionalCriteria(prevCriteria);
+    }
   }, []);
 
   return (
