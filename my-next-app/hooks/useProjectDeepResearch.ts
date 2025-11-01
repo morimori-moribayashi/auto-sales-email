@@ -1,9 +1,9 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { io, Socket } from 'socket.io-client';
-import { 
-    PlanningResponseSchema, 
-    GmailFilterResponseSchema, 
-    ErrorResponseSchema, 
+import {
+    PlanningResponseSchema,
+    GmailFilterResponseSchema,
+    ErrorResponseSchema,
     gmailThreadSchemaWithId,
     gmailThreadWithId
 } from './model';
@@ -48,7 +48,7 @@ function createSocketEventHandlers(
     function deduplicateEmailsBySubject(emails: gmailThreadWithId[]): gmailThreadWithId[] {
         const seenSubjects = new Set<string>();
         const deduplicated: gmailThreadWithId[] = [];
-        
+
         for (const email of emails) {
             if (!seenSubjects.has(email.subject)) {
                 seenSubjects.add(email.subject);
@@ -62,7 +62,7 @@ function createSocketEventHandlers(
         onConnect: () => {
             console.log('Connected to server');
         },
-        
+
         onPlanningResponse: (data: string) => {
             try {
                 const parsedData = JSON.parse(data);
@@ -94,6 +94,7 @@ function createSocketEventHandlers(
                 const validated = z.array(gmailThreadSchemaWithId).parse(parsedData.threads);
                 const deduplicated = deduplicateEmailsBySubject(validated);
                 setEmails(deduplicated);
+                localStorage.setItem("deepResearchEmails", JSON.stringify(deduplicated));
                 goToNextStep();
                 socket.disconnect();
                 setLoading(false);
@@ -135,6 +136,34 @@ export function useProjectDeepResearch() {
     const [analysisContent, setAnalysisContent] = useState("");
     const [analysisDialogOpen, setAnalysisDialogOpen] = useState(false);
 
+    useEffect(() => {
+        console.log(emails)
+        if (emails) {
+            localStorage.setItem("deepResearchEmails", JSON.stringify(emails));
+        }
+    }, [emails]);
+
+    useEffect(() => {
+        localStorage.setItem("deepResearchAdditionalCriteria", additionalCriteria);
+    }, [additionalCriteria]);
+
+    useEffect(() => {
+        try {
+            const prevEmails = localStorage.getItem("deepResearchEmails");
+            const prevCriteria = localStorage.getItem("deepResearchAdditionalCriteria");
+            console.log(prevEmails);
+            if (prevEmails) {
+                setEmails(JSON.parse(prevEmails));
+            }
+            if (prevCriteria) {
+                setAdditionalCriteria(prevCriteria);
+            }
+        }
+        catch {
+            console.error("Failed to parse previous deep research emails from localStorage");
+        }
+    }, []);
+
     const goToNextStep = useCallback(() => {
         setIndicatorsStatus(prevStatus => prevStatus.map((item, index) => {
             if (index === 0) return { status: "done" };
@@ -156,7 +185,7 @@ export function useProjectDeepResearch() {
 
         const socketUrl = process.env.NEXT_PUBLIC_DEEP_RESEARCH_SOCKET_URL || "http://localhost:8000";
         const socket = io(socketUrl);
-        
+
         resetState();
 
         try {

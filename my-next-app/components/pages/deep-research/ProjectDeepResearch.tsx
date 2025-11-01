@@ -56,25 +56,6 @@ export const ProjectDeepResearch = () => {
     setDrawerOpen(false);
   };
 
-  useEffect(() => {
-    localStorage.setItem("deepResearchEmails", JSON.stringify(emails));
-  }, [emails]);
-
-  useEffect(() => {
-    localStorage.setItem("deepResearchAdditionalCriteria", additionalCriteria);
-  }, [additionalCriteria]);
-
-  useEffect(() => {
-    const prevEmails = localStorage.getItem("deepResearchEmails");
-    const prevCriteria = localStorage.getItem("deepResearchAdditionalCriteria");
-    if (prevEmails) {
-      setEmails(JSON.parse(prevEmails));
-    }
-    if (prevCriteria) {
-      setAdditionalCriteria(prevCriteria);
-    }
-  }, []);
-
   return (
     <Box>
       <Header onMenuClick={handleMenuToggle} title="案件Research" />
