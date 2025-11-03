@@ -25,7 +25,6 @@ export const ProjectDeepResearch = () => {
     analysisContent,
     analysisDialogOpen,
     setAnalysisDialogOpen,
-    setEmails
   } = useProjectDeepResearch()
 
 
@@ -116,7 +115,7 @@ export const ProjectDeepResearch = () => {
                     >
                       分析結果を見る
                     </Button> */}
-                  <EmailList emails={emails} />
+                  <EmailList emails={emails} enginnerInfo={engineerInfo}/>
                   <AnalysisDialog analysisContent={analysisContent} open={analysisDialogOpen} onClose={() => { setAnalysisDialogOpen(false) }} />
                 </div>
               </Paper>

@@ -11,7 +11,7 @@ import {
   Box,
   Divider
 } from '@mui/material';
-import parse from 'html-react-parser';
+import EmailGenerationPanel from './EmailGenerationPanel';
 
 interface EmailDetailDialogProps {
   email: gmailThreadWithId | null;
@@ -19,15 +19,18 @@ interface EmailDetailDialogProps {
   onClose: () => void;
   selectNextEmail: () => void;
   selectPreviousEmail: () => void;
+  enginnerInfo: string;
 }
 
-export default function EmailDetailDialog({ email, open, onClose , selectNextEmail, selectPreviousEmail}: EmailDetailDialogProps) {
+export default function EmailDetailDialog({ email, open, onClose , selectNextEmail, selectPreviousEmail, enginnerInfo}: EmailDetailDialogProps) {
   if (!email) return null;
-  let bodyContent;
-  try {
-    bodyContent = parse(email.body || '');
-  } catch (error) {
-    bodyContent = email.body || '本文の解析に失敗しました';
+  // 任意のhtmlタグを取り除く関数
+  function stripHtmlTags(html: string): string {
+    // styleタグとその内容を削除
+    html = html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+    // brタグを改行に変換
+    html = html.replace(/<br\s*\/?>/gi, '\n');
+    return html.replace(/<[^>]*>/g, '\n').replace(/\n+/g, '\n').trim();
   }
 
   function handleArrwoKeyPress(event: React.KeyboardEvent) {
@@ -47,7 +50,7 @@ export default function EmailDetailDialog({ email, open, onClose , selectNextEma
       
       <DialogContent>
         <div className='grid grid-cols-3'>
-          <div className='col-span-2 pr-4'>
+          <div className='col-span-2 pr-4 max-h-[80vh] overflow-y-auto'>
                     <Box sx={{ 
           display: 'grid', 
           gridTemplateColumns: '1fr 1fr',
@@ -97,12 +100,12 @@ export default function EmailDetailDialog({ email, open, onClose , selectNextEma
               borderRadius: 1
             }}
           >
-            { bodyContent || '本文がありません'}
+            { stripHtmlTags(email.body) || '本文がありません'}
           </div>
         </Box>
           </div>
-          <div>
-            hogehoge
+          <div className='max-h-[80vh] overflow-y-auto'>
+            <EmailGenerationPanel email={email} enginnerInfo={enginnerInfo}/>
           </div>
         </div>
 

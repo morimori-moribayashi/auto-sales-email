@@ -6,9 +6,10 @@ import { gmailThreadWithId } from '@/hooks/model';
 
 type EmailListProps = {
   emails: gmailThreadWithId[] | undefined;
+  enginnerInfo: string;
 };
 
-export default function EmailList({ emails }: EmailListProps) {
+export default function EmailList({ emails, enginnerInfo }: EmailListProps) {
   const [selectedEmail, setSelectedEmail] = useState<gmailThreadWithId | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -90,6 +91,7 @@ export default function EmailList({ emails }: EmailListProps) {
         onClose={handleCloseDialog}
         selectNextEmail={selectNextEmail}
         selectPreviousEmail={selectPreviousEmail}
+        enginnerInfo={enginnerInfo}
       />
     </div>
   );
