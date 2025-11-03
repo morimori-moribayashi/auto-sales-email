@@ -1,4 +1,4 @@
-import { ProjectSearch } from "@/components/pages/project-search/ProjectSearch";
+import { ProjectSearch } from "@/components/pages/gmail-filter-generation/ProjectSearch";
 
 export default function Home() {
   return (

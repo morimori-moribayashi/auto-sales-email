@@ -9,7 +9,7 @@ import {
   Typography,
   Box,
 } from '@mui/material';
-import { MarkdownRenderer } from '../project-search/MarkdownRenderer';
+import { MarkdownRenderer } from '../gmail-filter-generation/MarkdownRenderer';
 
 interface AnalysisDialogProps {
   analysisContent: string;

@@ -202,8 +202,15 @@ export async function getMessagesBatch(messageIds: string[]): Promise<MessageBat
 // =====================================
 // 4. 検索 + 詳細取得（パイプライン実行）
 // =====================================
-export async function searchGmailFull(queries: string[], maxResults: number = 20): Promise<FullSearchSuccessResult | SearchErrorResult> {
+export async function searchGmailFull(queries: string[],date?: Date, maxResults: number = 20): Promise<FullSearchSuccessResult | SearchErrorResult> {
   try {
+    queries = queries.map(query => {
+        if(date){
+            const formattedDate = date.toISOString().split('T')[0];
+            return `${query} before:${formattedDate} after:${formattedDate}`;
+        }
+        return query;
+    });
     // ステップ1: メッセージIDを検索
     const searchResponse = await searchGmailParallel(queries, maxResults);
 

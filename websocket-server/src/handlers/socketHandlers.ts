@@ -13,6 +13,7 @@ import {
 import { config } from '../config/config';
 import { logger } from '../utils/logger';
 import { searchGmailFull } from '../gmail/gmail';
+import ca from 'zod/v4/locales/ca.js';
 
 interface SocketState {
     engineerInfo: string;
@@ -95,8 +96,18 @@ export class SocketHandlers {
 
     private async handleGmailResponse(socket: Socket, request: string, state: SocketState): Promise<void> {
         logger.info('Gmail response request received', { request });
+        let date = undefined
+        try{
+            const json = JSON.parse(request);
+            if(json.date){
+                date = new Date(json.date);
+            }
+        }
+        catch(error){
+            logger.error('Date parsing error', { error });
+        }
         try {
-            const result = await searchGmailFull(state.filters, config.GMAIL_SEARCH_MAX_RESULTS);
+            const result = await searchGmailFull(state.filters, date,config.GMAIL_SEARCH_MAX_RESULTS);
             if (!result.success) {
                 throw new Error(result.error || 'Gmail search failed');
             }

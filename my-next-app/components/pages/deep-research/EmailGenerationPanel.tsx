@@ -23,10 +23,7 @@ export default function EmailGenerationPanel({ email, enginnerInfo }: EmailGener
   const {
     setEngineerInfo,
     setEmailTemplate,
-    prompt,
     setPrompt,
-    projectContent,
-    setProjectContent,
     mailContent,
     setMailContent,
     editInstructions,
